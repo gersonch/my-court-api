@@ -1,12 +1,13 @@
 import { Schema } from 'mongoose'
 import * as bcrypt from 'bcrypt'
+import { Role } from '../common/guards/enums/rol.enum'
 
 export const UserSchema = new Schema({
   name: String,
   email: { type: String, unique: true, required: true },
-  password: { type: String, required: true },
+  password: { type: String, required: true, select: false },
   createdAt: { type: Date, default: Date.now },
-  role: { type: String, default: 'user', required: true, enum: ['admin', 'user'] },
+  role: { type: 'string', default: Role.USER, required: true, enum: Object.values(Role) },
 })
 
 import type { CallbackError } from 'mongoose'

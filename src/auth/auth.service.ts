@@ -22,7 +22,7 @@ export class AuthService {
   }
 
   async login({ email, password }: LoginDto) {
-    const user = await this.usersService.findOne(email)
+    const user = await this.usersService.findWithPassword(email)
     if (!user) {
       throw new UnauthorizedException('Invalid credentials')
     }
@@ -37,5 +37,9 @@ export class AuthService {
     const token = await this.jwtService.signAsync(payload)
 
     return { token }
+  }
+
+  async profile({ email, role }: { email: string; role: string }) {
+    return await this.usersService.findOne(email)
   }
 }

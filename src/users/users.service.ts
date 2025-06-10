@@ -17,6 +17,10 @@ export class UsersService {
     return user
   }
 
+  findWithPassword(email: string) {
+    return this.userModel.findOne({ email }).select(['password', 'email', 'name', 'role', 'id'])
+  }
+
   async findAll() {
     return this.userModel.find()
   }

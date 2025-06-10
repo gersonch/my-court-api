@@ -1,7 +1,7 @@
 import { Schema } from 'mongoose'
 
 export const ComplexSchema = new Schema({
-  name: { type: String, required: true },
+  name: { type: String, required: true, unique: true },
   description: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
@@ -9,5 +9,5 @@ export const ComplexSchema = new Schema({
   city: String,
   country: String,
   address: String,
-  owner: { type: Schema.Types.ObjectId, ref: 'Admin', required: true },
+  owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 })
