@@ -3,11 +3,12 @@ import { InjectConnection, InjectModel } from '@nestjs/mongoose'
 import { Connection, Model } from 'mongoose'
 import { CreateAdminWithComplexDto } from './dto/create-admin-with-complex.dto'
 import { IComplex } from 'src/types/complexes'
+import { IAdmin } from 'src/types/admin'
 
 @Injectable()
 export class AdminService {
   constructor(
-    @InjectModel('Admin') private adminModel: Model<any>,
+    @InjectModel('Admin') private adminModel: Model<IAdmin>,
     @InjectModel('Complex') private complexModel: Model<IComplex>,
     @InjectConnection() private readonly connection: Connection,
   ) {}
@@ -29,11 +30,14 @@ export class AdminService {
         { session },
       )
       await session.commitTransaction()
-      session.endSession()
+      await session.endSession()
     } catch (error) {
       await session.abortTransaction()
-      session.endSession()
-      throw new InternalServerErrorException('Failed to create admin and complex', error)
+      await session.endSession()
+      throw new InternalServerErrorException({
+        message: 'Failed to create admin and complex',
+        cause: error instanceof Error ? error.message : String(error),
+      })
     }
   }
 }
