@@ -3,9 +3,15 @@ import { ComplexesController } from './complexes.controller'
 import { ComplexesService } from './complexes.service'
 import { MongooseModule } from '@nestjs/mongoose'
 import { ComplexSchema } from './complexes.schema'
+import { UserSchema } from 'src/users/users.schema'
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'Complex', schema: ComplexSchema }])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: 'Complex', schema: ComplexSchema },
+      { name: 'User', schema: UserSchema },
+    ]),
+  ],
   controllers: [ComplexesController],
   providers: [ComplexesService],
 })
