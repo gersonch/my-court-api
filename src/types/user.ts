@@ -3,5 +3,6 @@ export interface User extends Document {
   name: string
   email: string
   password: string
+  role: string
   // Add other fields as needed
 }

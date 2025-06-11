@@ -11,4 +11,5 @@ export class createComplexesDto {
   city: string
   country: string
   description: string
+  owner: string
 }
