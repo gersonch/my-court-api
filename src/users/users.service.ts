@@ -24,4 +24,8 @@ export class UsersService {
   async findAll() {
     return this.userModel.find()
   }
+
+  getUserIdByEmail(email: string) {
+    return this.userModel.findOne({ email }).select(['id'])
+  }
 }

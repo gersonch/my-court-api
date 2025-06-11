@@ -4,11 +4,11 @@ import { createComplexesDto } from './dto/create-complexes.dto'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { Role } from 'src/common/guards/enums/rol.enum'
 
-@Auth(Role.ADMIN)
 @Controller('complexes')
 export class ComplexesController {
   constructor(private readonly complexService: ComplexesService) {}
 
+  @Auth(Role.ADMIN)
   @Post()
   async create(@Body() body: createComplexesDto) {
     //check if the user is role owner
@@ -25,9 +25,13 @@ export class ComplexesController {
     return this.complexService.create(body)
   }
 
-  @Auth(Role.OWNER)
   @Get()
   findAll() {
     return this.complexService.findAll()
+  }
+
+  @Get('id')
+  getIdForEmail() {
+    return 'hola'
   }
 }

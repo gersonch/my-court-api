@@ -4,6 +4,7 @@ import { ComplexesService } from './complexes.service'
 import { MongooseModule } from '@nestjs/mongoose'
 import { ComplexSchema } from './complexes.schema'
 import { UserSchema } from 'src/users/users.schema'
+import { AuthModule } from 'src/auth/auth.module'
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { UserSchema } from 'src/users/users.schema'
       { name: 'Complex', schema: ComplexSchema },
       { name: 'User', schema: UserSchema },
     ]),
+    AuthModule,
   ],
   controllers: [ComplexesController],
   providers: [ComplexesService],
