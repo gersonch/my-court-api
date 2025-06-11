@@ -5,11 +5,20 @@ export class createComplexesDto {
   name: string
 
   @IsString()
+  region: string
+
+  @IsString()
   address: string
 
   @IsString()
   city: string
+
+  @IsString()
   country: string
+
+  @IsString()
   description: string
+
+  @IsString()
   owner: string
 }
