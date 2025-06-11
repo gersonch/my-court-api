@@ -3,8 +3,8 @@ import { MongooseModule } from '@nestjs/mongoose'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { UsersModule } from './users/users.module'
 import { ComplexesModule } from './complexes/complexes.module'
-
 import { AuthModule } from './auth/auth.module'
+import { FieldsModule } from './fields/fields.module'
 
 @Module({
   imports: [
@@ -26,6 +26,8 @@ import { AuthModule } from './auth/auth.module'
     ComplexesModule,
 
     AuthModule,
+
+    FieldsModule,
   ],
 })
 export class AppModule {}

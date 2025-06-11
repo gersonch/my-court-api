@@ -9,8 +9,9 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()
     const token = this.extractTokenFromHeader(request)
+    // prettier-ignore
     if (!token) {
-      throw new UnauthorizedException()
+      throw new UnauthorizedException("Invalid token. You don't have permission to access this resource.")
     }
 
     try {
@@ -19,7 +20,8 @@ export class AuthGuard implements CanActivate {
       })
       request['user'] = payload
     } catch {
-      throw new UnauthorizedException()
+      // prettier-ignore
+      throw new UnauthorizedException("Invalid token. You don't have permission to access this resource.")
     }
     return true
   }
