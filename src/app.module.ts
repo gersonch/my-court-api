@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module'
 import { ComplexesModule } from './complexes/complexes.module'
 import { AuthModule } from './auth/auth.module'
 import { FieldsModule } from './fields/fields.module'
+import { ReservationsModule } from './reservations/reservations.module';
 
 @Module({
   imports: [
@@ -28,6 +29,8 @@ import { FieldsModule } from './fields/fields.module'
     AuthModule,
 
     FieldsModule,
+
+    ReservationsModule,
   ],
 })
 export class AppModule {}

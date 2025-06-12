@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Body, BadRequestException } from '@nestjs/common'
+import { Controller, Get, Post, Body, BadRequestException, Put } from '@nestjs/common'
 import { ComplexesService } from './complexes.service'
-import { createComplexesDto } from './dto/create-complexes.dto'
+import { addImageUrlDto, createComplexesDto } from './dto/create-complexes.dto'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { Role } from 'src/common/guards/enums/rol.enum'
+import { ActiveUser } from 'src/common/decorators/active-user.decorator'
+import { IUserActive } from 'src/common/interfaces/user-active.interface'
 
+@Auth(Role.OWNER)
 @Controller('complexes')
 export class ComplexesController {
   constructor(private readonly complexService: ComplexesService) {}
@@ -33,5 +36,10 @@ export class ComplexesController {
   @Get('id')
   getIdForEmail() {
     return 'hola'
+  }
+
+  @Put('add-image')
+  async addImageUrl(@ActiveUser() user: IUserActive, @Body() body: addImageUrlDto) {
+    return this.complexService.addImageUrl(user.sub, body.imageUrl)
   }
 }

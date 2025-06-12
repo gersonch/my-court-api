@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { createComplexesDto } from './dto/create-complexes.dto'
@@ -29,5 +29,28 @@ export class ComplexesService {
 
   findAll() {
     return this.complexModel.find()
+  }
+
+  async addImageUrl(userId: string, imageUrl: string) {
+    const complex = await this.complexModel.findOne({ owner: userId })
+
+    if (!complex) {
+      throw new BadRequestException('Complex not found for the given owner')
+    }
+
+    if (!imageUrl || typeof imageUrl !== 'string') {
+      throw new BadRequestException('Invalid image URL')
+    }
+
+    const imagesCount = Array.isArray(complex.image_url) ? complex.image_url.length : 0
+    console.log('Images count:', imagesCount)
+    if (imagesCount >= 10) {
+      throw new BadRequestException('Cannot add more than 10 images to a complex')
+    }
+    return this.complexModel.findByIdAndUpdate(
+      complex._id, // ✅ Aquí usamos el ID del complejo
+      { $push: { image_url: imageUrl } },
+      { new: true },
+    )
   }
 }

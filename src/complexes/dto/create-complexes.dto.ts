@@ -21,4 +21,12 @@ export class createComplexesDto {
 
   @IsString()
   owner: string
+
+  @IsString()
+  image_url: string[]
+}
+
+export class addImageUrlDto {
+  @IsString()
+  imageUrl: string
 }
