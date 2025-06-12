@@ -37,16 +37,15 @@ export class ComplexesService {
     if (!complex) {
       throw new BadRequestException('Complex not found for the given owner')
     }
-
     if (!imageUrl || typeof imageUrl !== 'string') {
-      throw new BadRequestException('Invalid image URL')
+      throw new BadRequestException('Invalid image URL provided')
     }
 
-    const imagesCount = Array.isArray(complex.image_url) ? complex.image_url.length : 0
-    console.log('Images count:', imagesCount)
-    if (imagesCount >= 10) {
+    const imageCount = complex?.image_url?.length ?? 0
+    if (imageCount >= 10) {
       throw new BadRequestException('Cannot add more than 10 images to a complex')
     }
+
     return this.complexModel.findByIdAndUpdate(
       complex._id, // ✅ Aquí usamos el ID del complejo
       { $push: { image_url: imageUrl } },

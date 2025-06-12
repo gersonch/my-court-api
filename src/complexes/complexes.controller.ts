@@ -40,6 +40,6 @@ export class ComplexesController {
 
   @Put('add-image')
   async addImageUrl(@ActiveUser() user: IUserActive, @Body() body: addImageUrlDto) {
-    return this.complexService.addImageUrl(user.sub, body.imageUrl)
+    return this.complexService.addImageUrl(user.sub, body.image_url)
   }
 }

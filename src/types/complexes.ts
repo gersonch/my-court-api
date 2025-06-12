@@ -3,7 +3,7 @@ export interface Complex extends Document {
   description: string
   createdAt?: Date
   updatedAt?: Date
-  image_url?: string
+  image_url?: string[]
   city?: string
   country?: string
   address?: string
