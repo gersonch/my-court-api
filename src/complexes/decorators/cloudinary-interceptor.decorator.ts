@@ -2,10 +2,17 @@ import { FileInterceptor } from '@nestjs/platform-express'
 import { StorageEngine } from 'multer'
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface'
 import { cloudinary } from 'src/config/cloudinary.config'
+import { UploadApiErrorResponse, UploadApiResponse } from 'cloudinary'
+import { Request } from 'express'
+
+interface MulterFileWithPath extends Express.Multer.File {
+  path: string
+}
 
 class CloudinaryStorage implements StorageEngine {
   //prettier-ignore
-  _handleFile(req: any, file: Express.Multer.File, cb: (error?: any, info?: Partial<Express.Multer.File>) => void) {
+  _handleFile(req: Request, file: MulterFileWithPath, cb: (error?: any, info?: Partial<Express.Multer.File>) => void):void {
+
     if (!file || !file.stream) {
       return cb(new Error('Empty file or no stream provided'))
     }
@@ -15,7 +22,7 @@ class CloudinaryStorage implements StorageEngine {
         resource_type: 'image',
         folder: 'uploads', // Puedes personalizar este folder
       },
-      (error, result) => {
+      (error: UploadApiErrorResponse , result: UploadApiResponse) => {
         if (error || !result) {
           return cb(error || new Error('Upload failed'))
         }
@@ -30,7 +37,7 @@ class CloudinaryStorage implements StorageEngine {
     file.stream.pipe(uploadStream)
   }
 
-  _removeFile(req, file, cb) {
+  _removeFile(req: Request, file: Express.Multer.File, cb: (error: Error | null) => void): void {
     cb(null)
   }
 }
@@ -45,7 +52,7 @@ export const cloudinaryStorage = (): MulterOptions => {
       }
       cb(null, true)
     },
-    limits: { fileSize: 500 * 1024 }, // 500 kb maximo
+    limits: { fileSize: 250 * 1024 }, // 250 kb maximo
   }
 }
 

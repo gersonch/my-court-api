@@ -8,12 +8,14 @@ import { ActiveUser } from 'src/common/decorators/active-user.decorator'
 import { IUserActive } from 'src/common/interfaces/user-active.interface'
 import { CloudinaryFileInterceptor } from './decorators/cloudinary-interceptor.decorator'
 
-@Auth(Role.OWNER)
+interface MulterFileWithPath extends Express.Multer.File {
+  path: string
+}
+
 @Controller('complexes')
 export class ComplexesController {
   constructor(private readonly complexService: ComplexesService) {}
 
-  @Auth(Role.ADMIN)
   @Post()
   async create(@Body() body: createComplexesDto) {
     //check if the user is role owner
@@ -42,7 +44,7 @@ export class ComplexesController {
 
   @Put('add-image')
   @UseInterceptors(CloudinaryFileInterceptor())
-  async addImageUrl(@ActiveUser() user: IUserActive, @UploadedFile() file: Express.Multer.File) {
+  async addImageUrl(@ActiveUser() user: IUserActive, @UploadedFile() file: MulterFileWithPath) {
     if (!file || !file.path) {
       throw new BadRequestException('No se subió ningún archivo')
     }
