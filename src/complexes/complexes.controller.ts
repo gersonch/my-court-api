@@ -1,6 +1,7 @@
+//prettier-ignore
 import { Controller, Get, Post, Body, BadRequestException, Put, UseInterceptors, UploadedFile } from '@nestjs/common'
 import { ComplexesService } from './complexes.service'
-import { addImageUrlDto, createComplexesDto } from './dto/create-complexes.dto'
+import { createComplexesDto } from './dto/create-complexes.dto'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { Role } from 'src/common/guards/enums/rol.enum'
 import { ActiveUser } from 'src/common/decorators/active-user.decorator'
