@@ -1,9 +1,14 @@
+import { ConfigService } from '@nestjs/config'
 import { v2 as cloudinary } from 'cloudinary'
+import * as dotenv from 'dotenv'
+dotenv.config()
+
+const configService = new ConfigService()
 
 cloudinary.config({
-  cloud_name: 'dsm9c4emg',
-  api_key: '629481947483987',
-  api_secret: 'gk1Xbaw9vLc1to7KvdtVOfRJVbg',
+  cloud_name: configService.get<string>('CLOUDINARY_NAME'),
+  api_key: configService.get<string>('CLOUDINARY_API_KEY'),
+  api_secret: configService.get<string>('CLOUDINARY_API_SECRET'),
   secure: true,
 })
 
