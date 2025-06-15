@@ -16,6 +16,7 @@ interface MulterFileWithPath extends Express.Multer.File {
 export class ComplexesController {
   constructor(private readonly complexService: ComplexesService) {}
 
+  @Auth(Role.ADMIN)
   @Post()
   async create(@Body() body: createComplexesDto) {
     //check if the user is role owner
@@ -42,6 +43,7 @@ export class ComplexesController {
     return 'hola'
   }
 
+  @Auth(Role.OWNER)
   @Put('add-image')
   @UseInterceptors(CloudinaryFileInterceptor())
   async addImageUrl(@ActiveUser() user: IUserActive, @UploadedFile() file: MulterFileWithPath) {

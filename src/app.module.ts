@@ -6,6 +6,8 @@ import { ComplexesModule } from './complexes/complexes.module'
 import { AuthModule } from './auth/auth.module'
 import { FieldsModule } from './fields/fields.module'
 
+import { RatingModule } from './rating/rating.module'
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -25,10 +27,9 @@ import { FieldsModule } from './fields/fields.module'
     }),
     UsersModule,
     ComplexesModule,
-
     AuthModule,
-
     FieldsModule,
+    RatingModule,
   ],
 })
 export class AppModule {}
