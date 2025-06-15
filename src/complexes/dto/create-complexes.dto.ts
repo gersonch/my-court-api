@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator'
+import { IsArray, IsIn, IsOptional, IsString } from 'class-validator'
 
 export class createComplexesDto {
   @IsString()
@@ -30,7 +30,25 @@ export class addImageUrlDto {
   image_url: string
 }
 
-export class addSportDto {
-  @IsString()
-  sports: string
+export class updateComplexDto {
+  @IsOptional()
+  @IsArray()
+  @IsIn(['futbol', 'tenis', 'padel'], { each: true })
+  sports?: string[]
+
+  @IsOptional()
+  equipment?: {
+    futbol?: boolean
+    tenis?: boolean
+    padel?: boolean
+  }
+
+  @IsOptional()
+  facilities?: {
+    parking?: boolean
+    bar?: boolean
+    restaurant?: boolean
+    changingRooms?: boolean
+    showers?: boolean
+  }
 }

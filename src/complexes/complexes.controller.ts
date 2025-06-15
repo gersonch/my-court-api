@@ -1,7 +1,7 @@
 //prettier-ignore
-import { Controller, Get, Post, Body, BadRequestException, Put, UseInterceptors, UploadedFile } from '@nestjs/common'
+import { Controller, Get, Post, Body, BadRequestException, Put, UseInterceptors, UploadedFile, Patch, Param } from '@nestjs/common'
 import { ComplexesService } from './complexes.service'
-import { createComplexesDto } from './dto/create-complexes.dto'
+import { createComplexesDto, updateComplexDto } from './dto/create-complexes.dto'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { Role } from 'src/common/guards/enums/rol.enum'
 import { ActiveUser } from 'src/common/decorators/active-user.decorator'
@@ -52,5 +52,21 @@ export class ComplexesController {
     }
 
     return this.complexService.addImageUrl(user.sub, file.path)
+  }
+
+  @Auth(Role.OWNER)
+  @Patch('update')
+  updateComplex(@Body() body: updateComplexDto, @ActiveUser() user: IUserActive) {
+    if (!body || Object.keys(body).length === 0) {
+      throw new BadRequestException('No se proporcionaron datos para actualizar el complejo')
+    }
+
+    return this.complexService.updateComplex(body, user.sub)
+  }
+
+  @Auth(Role.OWNER)
+  @Get(':complexId')
+  findById(@Param('complexId') complexId: string, @ActiveUser() user: IUserActive) {
+    return this.complexService.findById(complexId, user.sub)
   }
 }

@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
-import { createComplexesDto } from './dto/create-complexes.dto'
+import { createComplexesDto, updateComplexDto } from './dto/create-complexes.dto'
 import { User } from 'src/types/user'
 
 @Injectable()
@@ -51,5 +51,34 @@ export class ComplexesService {
       { $push: { image_url: imageUrl } },
       { new: true },
     )
+  }
+
+  async updateComplex(updateComplex: updateComplexDto, userId: string) {
+    const complex = await this.complexModel.findOne({ owner: userId })
+    if (!complex) {
+      throw new BadRequestException('Complex not found for the given owner')
+    }
+
+    const updatedComplex = await this.complexModel.findByIdAndUpdate(
+      complex._id,
+      { $set: updateComplex },
+      { new: true },
+    )
+
+    return updatedComplex
+  }
+
+  async findById(complexId: string, userId: string) {
+    if (!complexId) {
+      throw new BadRequestException('Complex ID is required')
+    }
+    if (!userId) {
+      throw new BadRequestException('User ID is required')
+    }
+    const complex = await this.complexModel.findOne({ _id: complexId, owner: userId })
+    if (!complex) {
+      throw new BadRequestException('Complex not found for the given ID and owner')
+    }
+    return complex
   }
 }
