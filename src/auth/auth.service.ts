@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable, //comentario para que se vea uno abajo del otro
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common'
 import { UsersService } from 'src/users/users.service'
 import { RegisterDto } from './dto/register.dto'
 import { LoginDto } from './dto/login.dto'
@@ -32,6 +37,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials')
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const payload = { email: user.email, sub: user.id, role: user.role }
 
     const token = await this.jwtService.signAsync(payload)
@@ -40,6 +46,18 @@ export class AuthService {
   }
 
   async profile({ email, role }: { email: string; role: string }) {
-    return await this.usersService.findOne(email)
+    try {
+      const profile = await this.usersService.findOne(email)
+
+      if (!profile) {
+        throw new BadRequestException('User not found')
+      }
+      if (role !== 'admin' && role !== 'user') {
+        throw new BadRequestException('Invalid role')
+      }
+      return profile
+    } catch {
+      throw new InternalServerErrorException('Error fetching user profile')
+    }
   }
 }
