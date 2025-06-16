@@ -24,7 +24,7 @@ export class AuthController {
   async login(@Body() logindto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const loginResult = await this.authService.login(logindto)
 
-    res.cookie('token', loginResult.accessToken, {
+    res.cookie('token', loginResult.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
       sameSite: 'lax', // Adjust as necessary
@@ -48,7 +48,7 @@ export class AuthController {
   //   return req.user
   // }
 
-  @Auth(Role.USER)
+  @Auth(Role.OWNER)
   @Get('profile')
   profile(@ActiveUser() user: IUserActive) {
     console.log(user)

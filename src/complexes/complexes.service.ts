@@ -64,9 +64,10 @@ export class ComplexesService {
         { $push: { image_url: imageUrl } },
         { new: true },
       )
-    } catch {
+    } catch (error) {
       // Puedes loguear el error aquí si deseas
-      throw new BadRequestException('Error adding image to complex')
+      console.error(error)
+      throw new InternalServerErrorException('Error adding image to complex')
     }
   }
 
