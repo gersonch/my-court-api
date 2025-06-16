@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Res } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { RegisterDto } from './dto/register.dto'
 import { LoginDto } from './dto/login.dto'
-import { Auth } from './decorators/auth.decorator'
+import { Auth } from './decorators/auth-passport.decorator'
 import { Role } from '../common/guards/enums/rol.enum'
 import { ActiveUser } from 'src/common/decorators/active-user.decorator'
 import { IUserActive } from 'src/common/interfaces/user-active.interface'
@@ -24,7 +24,7 @@ export class AuthController {
   async login(@Body() logindto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const loginResult = await this.authService.login(logindto)
 
-    res.cookie('token', loginResult.token, {
+    res.cookie('token', loginResult.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
       sameSite: 'lax', // Adjust as necessary
