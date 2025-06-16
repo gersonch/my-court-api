@@ -31,7 +31,7 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid credentials')
     }
-
+    const { name, role, _id } = user
     const isPasswordValid = await bcrypt.compare(password, user.password)
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials')
@@ -42,7 +42,7 @@ export class AuthService {
 
     const token = await this.jwtService.signAsync(payload)
 
-    return { token }
+    return { token, user: { id: _id, name, email, role } }
   }
 
   async profile({ email, role }: { email: string; role: string }) {
