@@ -11,7 +11,7 @@ export class AuthGuard implements CanActivate {
     private readonly configService: ConfigService,
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest()
+    const request: Request = context.switchToHttp().getRequest<Request>()
     const token = this.extractTokenFromHeader(request)
     // prettier-ignore
     if (!token) {
@@ -19,7 +19,14 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync(token, {
+      interface JwtPayload {
+        // Add properties according to your JWT payload structure, e.g.:
+        sub: string
+        email?: string
+        // Add other fields as needed
+        [key: string]: any
+      }
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
         secret: this.configService.get<string>('JWT_SECRET'),
       })
       request['user'] = payload

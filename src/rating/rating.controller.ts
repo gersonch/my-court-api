@@ -11,8 +11,8 @@ import { IUserActive } from 'src/common/interfaces/user-active.interface'
 export class RatingController {
   constructor(private readonly ratingService: RatingService) {}
 
-  @Get()
-  getRatingForComplex(@Body('complexId') complexId: string) {
+  @Get(':complexId')
+  getRatingForComplex(@Param('complexId') complexId: string) {
     return this.ratingService.getRatingForComplex(complexId)
   }
 

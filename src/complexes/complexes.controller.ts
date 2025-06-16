@@ -54,6 +54,12 @@ export class ComplexesController {
     return this.complexService.addImageUrl(user.sub, file.path)
   }
 
+  @Patch('delete-image')
+  @Auth(Role.OWNER)
+  async deleteImageUrl(@ActiveUser() user: IUserActive, @Body('imageUrl') imageUrl: string) {
+    return this.complexService.deleteImageUrl(user.sub, imageUrl)
+  }
+
   @Auth(Role.OWNER)
   @Patch('update')
   updateComplex(@Body() body: updateComplexDto, @ActiveUser() user: IUserActive) {
