@@ -2,7 +2,7 @@
 import { Controller, Get, Post, Body, BadRequestException, Put, UseInterceptors, UploadedFile, Patch, Param } from '@nestjs/common'
 import { ComplexesService } from './complexes.service'
 import { createComplexesDto, updateComplexDto } from './dto/create-complexes.dto'
-import { Auth } from 'src/auth/decorators/auth.decorator'
+import { Auth } from 'src/auth/decorators/auth-passport.decorator'
 import { Role } from 'src/common/guards/enums/rol.enum'
 import { ActiveUser } from 'src/common/decorators/active-user.decorator'
 import { IUserActive } from 'src/common/interfaces/user-active.interface'
@@ -47,6 +47,7 @@ export class ComplexesController {
   @Put('add-image')
   @UseInterceptors(CloudinaryFileInterceptor())
   async addImageUrl(@ActiveUser() user: IUserActive, @UploadedFile() file: MulterFileWithPath) {
+    console.log(user)
     if (!file || !file.path) {
       throw new BadRequestException('No se subió ningún archivo')
     }
@@ -56,7 +57,7 @@ export class ComplexesController {
 
   @Patch('delete-image')
   @Auth(Role.OWNER)
-  async deleteImageUrl(@ActiveUser() user: IUserActive, @Body('imageUrl') imageUrl: string) {
+  async deleteImageUrl(@ActiveUser() user: IUserActive, @Body('image-url') imageUrl: string) {
     return this.complexService.deleteImageUrl(user.sub, imageUrl)
   }
 

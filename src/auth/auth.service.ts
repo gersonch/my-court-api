@@ -9,6 +9,7 @@ import { RegisterDto } from './dto/register.dto'
 import { LoginDto } from './dto/login.dto'
 import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
+import { IAuthUser } from './interfaces/auth-user.interface'
 
 @Injectable()
 export class AuthService {
@@ -16,6 +17,19 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
   ) {}
+
+  async validateUser(email: string, password: string): Promise<IAuthUser> {
+    const user = await this.usersService.findWithPassword(email)
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials')
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password)
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials')
+    }
+    const { name, role, _id } = user
+    return { id: _id.toString(), name, email, role }
+  }
 
   async register({ name, email, password }: RegisterDto) {
     const user = await this.usersService.findOne(email)
@@ -27,22 +41,22 @@ export class AuthService {
   }
 
   async login({ email, password }: LoginDto) {
-    const user = await this.usersService.findWithPassword(email)
+    const user = await this.validateUser(email, password)
     if (!user) {
       throw new UnauthorizedException('Invalid credentials')
     }
-    const { name, role, _id } = user
-    const isPasswordValid = await bcrypt.compare(password, user.password)
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials')
+    const payload = { email: user.email, role: user.role, sub: user.id }
+    const token = this.jwtService.sign(payload)
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     }
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const payload = { email: user.email, sub: user.id, role: user.role }
-
-    const token = await this.jwtService.signAsync(payload)
-
-    return { token, user: { id: _id, name, email, role } }
   }
 
   async profile({ email, role }: { email: string; role: string }) {

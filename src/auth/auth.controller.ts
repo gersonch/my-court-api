@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Res } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { RegisterDto } from './dto/register.dto'
 import { LoginDto } from './dto/login.dto'
-import { Auth } from './decorators/auth.decorator'
+import { Auth } from './decorators/auth-passport.decorator'
 import { Role } from '../common/guards/enums/rol.enum'
 import { ActiveUser } from 'src/common/decorators/active-user.decorator'
 import { IUserActive } from 'src/common/interfaces/user-active.interface'
@@ -48,7 +48,7 @@ export class AuthController {
   //   return req.user
   // }
 
-  @Auth(Role.USER)
+  @Auth(Role.OWNER)
   @Get('profile')
   profile(@ActiveUser() user: IUserActive) {
     console.log(user)
