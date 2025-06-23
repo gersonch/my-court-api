@@ -11,10 +11,17 @@ export class UsersService {
     const created = new this.userModel(userDto)
     return created.save()
   }
+  async updateRefreshToken(userId: string, refreshToken: string) {
+    return this.userModel.findByIdAndUpdate(userId, { refreshToken })
+  }
 
   async findOne(email: string) {
     const user = await this.userModel.findOne({ email: email })
     return user
+  }
+
+  async findById(id: string) {
+    return this.userModel.findById(id)
   }
 
   findWithPassword(email: string) {

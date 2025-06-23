@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common'
+import { BadRequestException, Body, Controller, Get, Param, Post, Put } from '@nestjs/common'
 import { RatingService } from './rating.service'
 import { CreateRatingDto } from './dto/ratingDto.dto'
 
@@ -34,5 +34,21 @@ export class RatingController {
     @Param('complexId') complexId: string,
   ) {
     return this.ratingService.updateRating(createRatingDto, user.sub, complexId)
+  }
+
+  @Auth(Role.USER)
+  @Get(':complexId/user')
+  async getRatingsForUser(@ActiveUser() user: IUserActive, @Param('complexId') complexId: string) {
+    const ratings = await this.ratingService.getRatingsForUser(user.sub, complexId)
+    if (!ratings) {
+      return {
+        message: 'You have not rated this complex yet.',
+        ratings: null,
+      }
+    }
+    return {
+      message: 'Ratings found.',
+      ratings,
+    }
   }
 }
