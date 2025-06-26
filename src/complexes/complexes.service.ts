@@ -4,6 +4,7 @@ import { Model } from 'mongoose'
 import { createComplexesDto, updateComplexDto } from './dto/create-complexes.dto'
 import { User } from 'src/types/user'
 import { cloudinary } from 'src/config/cloudinary.config'
+import { Rating } from 'src/rating/rating.service'
 
 interface CloudinaryDestroyResponse {
   result: string
@@ -13,6 +14,7 @@ export class ComplexesService {
   constructor(
     @InjectModel('Complex') private complexModel: Model<createComplexesDto>,
     @InjectModel('User') private userModel: Model<User>,
+    @InjectModel('Rating') private ratingModel: Model<Rating>,
   ) {}
 
   async userHasRoleOwner(userId: string) {

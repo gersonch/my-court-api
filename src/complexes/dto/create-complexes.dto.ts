@@ -22,6 +22,8 @@ export class createComplexesDto {
   @IsString()
   owner: string
 
+  @IsOptional()
+  @IsArray()
   image_url?: string[]
 }
 

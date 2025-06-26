@@ -7,6 +7,7 @@ import { Role } from 'src/common/guards/enums/rol.enum'
 import { ActiveUser } from 'src/common/decorators/active-user.decorator'
 import { IUserActive } from 'src/common/interfaces/user-active.interface'
 import { CloudinaryFileInterceptor } from './decorators/cloudinary-interceptor.decorator'
+import { RatingService } from 'src/rating/rating.service'
 
 interface MulterFileWithPath extends Express.Multer.File {
   path: string
@@ -14,7 +15,10 @@ interface MulterFileWithPath extends Express.Multer.File {
 
 @Controller('complexes')
 export class ComplexesController {
-  constructor(private readonly complexService: ComplexesService) {}
+  constructor(
+    private readonly complexService: ComplexesService,
+    private readonly ratingService: RatingService,
+  ) {}
 
   @Auth(Role.ADMIN)
   @Post()
