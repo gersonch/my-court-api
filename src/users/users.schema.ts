@@ -8,6 +8,7 @@ export const UserSchema = new Schema({
   password: { type: String, required: true, select: false },
   createdAt: { type: Date, default: Date.now },
   role: { type: 'string', default: Role.USER, required: true, enum: Object.values(Role) },
+  refreshToken: { type: String, required: false },
 })
 
 import type { CallbackError } from 'mongoose'

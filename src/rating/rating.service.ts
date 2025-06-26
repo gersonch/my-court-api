@@ -60,4 +60,8 @@ export class RatingService {
     console.log(ratings)
     return averageRating ? averageRating : 0
   }
+
+  async getRatingsForUser(userId: string, complexId: string): Promise<Rating[]> {
+    return this.ratingModel.find({ userId, complexId })
+  }
 }
