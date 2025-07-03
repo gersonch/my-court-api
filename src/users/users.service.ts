@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { CreateUserDto } from './dto/create-user.dto'
+import { UserProfileDto } from './dto/user-profile.dto'
 
 @Injectable()
 export class UsersService {
@@ -25,14 +26,62 @@ export class UsersService {
   }
 
   findWithPassword(email: string) {
-    return this.userModel.findOne({ email }).select(['password', 'email', 'name', 'role', 'id'])
+    return this.userModel
+      .findOne({ email }) // Find user by email
+      .select(['password', 'email', 'name', 'role', 'id'])
   }
 
   async findAll() {
     return this.userModel.find()
   }
 
-  getUserIdByEmail(email: string) {
-    return this.userModel.findOne({ email }).select(['id'])
+  async getUserProfile(id: string) {
+    return await this.userModel
+      .findById(id)
+      .select(['name', 'email', 'image_url', 'country', 'city', 'address', 'phone'])
+  }
+
+  async updateUserProfile(id: string, userProfile: Partial<UserProfileDto>) {
+    return await this.userModel.findByIdAndUpdate(id, userProfile, { new: true })
+  }
+
+  async updateImageUrl(userId: string, imageUrl: string) {
+    try {
+      const user = await this.findById(userId)
+      if (!user) {
+        throw new BadRequestException('User not found')
+      }
+
+      if (!imageUrl || typeof imageUrl !== 'string') {
+        throw new BadRequestException('Invalid image URL provided')
+      }
+
+      return await this.userModel.findByIdAndUpdate(
+        user._id, // Use the _id of the user
+        { image_url: imageUrl },
+        { new: true },
+      )
+    } catch (error) {
+      console.error(error)
+      throw new InternalServerErrorException('Error updating user image URL')
+    }
+  }
+
+  async deleteUserImage(userId: string) {
+    try {
+      const user = await this.findById(userId)
+      if (!user) {
+        throw new BadRequestException('User not found')
+      }
+
+      return await this.userModel.findByIdAndUpdate(
+        user._id, // Use the _id of the user
+        { image_url: '' },
+        { new: true },
+      )
+    } catch (error) {
+      console.error(error)
+      throw new InternalServerErrorException('Error deleting user image URL')
+    }
   }
 }

@@ -20,7 +20,7 @@ class CloudinaryStorage implements StorageEngine {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         resource_type: 'image',
-        folder: 'uploads', // Puedes personalizar este folder
+        folder: 'uploads',  // Puedes personalizar este folder
       },
       (error: UploadApiErrorResponse , result: UploadApiResponse) => {
         if (error || !result) {
@@ -52,7 +52,7 @@ export const cloudinaryStorage = (): MulterOptions => {
       }
       cb(null, true)
     },
-    limits: { fileSize: 250 * 1024 }, // 250 kb maximo
+    limits: { fileSize: 500 * 1024 }, // 500 kb maximo
   }
 }
 

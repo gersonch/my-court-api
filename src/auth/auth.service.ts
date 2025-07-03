@@ -56,13 +56,13 @@ export class AuthService {
     }
   }
 
-  async register({ name, email, password }: RegisterDto) {
-    const user = await this.usersService.findOne(email)
+  async register(registerDto: RegisterDto) {
+    const user = await this.usersService.findOne(registerDto.email)
     if (user) {
       throw new BadRequestException('User already exists')
     }
-    await this.usersService.create({ name, email, password })
-    return { name, email }
+    await this.usersService.create(registerDto)
+    return { name: registerDto.name, email: registerDto.email }
   }
 
   async login({ email, password }: LoginDto) {

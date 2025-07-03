@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator'
+import { IsEmail, IsNumber, IsOptional, IsString, MinLength } from 'class-validator'
 import { Transform } from 'class-transformer'
 
 export class RegisterDto {
@@ -18,4 +18,28 @@ export class RegisterDto {
   @IsString()
   @IsOptional()
   role: string
+
+  @IsString()
+  @IsOptional()
+  lastName: string
+
+  @IsNumber()
+  @IsOptional()
+  phone: number
+
+  @IsString()
+  @IsOptional()
+  city: string
+
+  @IsString()
+  @IsOptional()
+  country: string
+
+  @IsString()
+  @IsOptional()
+  address: string
+
+  @IsString()
+  @IsOptional()
+  image_url: string
 }
