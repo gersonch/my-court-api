@@ -56,7 +56,7 @@ export class UsersController {
 
   @Auth(Role.USER)
   @Patch(':id/delete-image')
-  async deleteUserImage(@Param('id') id: string) {
-    return this.usersService.deleteUserImage(id)
+  async deleteUserImage(@Param('id') id: string, @Body('imageUrl') imageUrl: string) {
+    return this.usersService.deleteUserImage(id, imageUrl)
   }
 }

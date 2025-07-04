@@ -57,7 +57,7 @@ export class RatingService {
     const stars = ratings.map((rating) => rating.stars)
     const totalRatings = ratings.length
     const averageRating = totalRatings > 0 ? stars.reduce((a, b) => a + b, 0) / totalRatings : 0
-    console.log(ratings)
+
     return averageRating ? averageRating : 0
   }
 
