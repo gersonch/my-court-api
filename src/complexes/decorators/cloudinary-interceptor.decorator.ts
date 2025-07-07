@@ -16,11 +16,13 @@ class CloudinaryStorage implements StorageEngine {
     if (!file || !file.stream) {
       return cb(new Error('Empty file or no stream provided'))
     }
+    const userId =
+      (req as Request & { user?: { sub?: string } }).user?.sub || 'default'
 
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         resource_type: 'image',
-        folder: 'uploads',  // Puedes personalizar este folder
+        folder: `uploads/${userId}`,  // Puedes personalizar este folder
       },
       (error: UploadApiErrorResponse , result: UploadApiResponse) => {
         if (error || !result) {

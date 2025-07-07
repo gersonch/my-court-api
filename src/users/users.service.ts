@@ -48,18 +48,40 @@ export class UsersService {
 
   async updateImageUrl(userId: string, imageUrl: string) {
     try {
+      const uriIfNoProfileImage =
+        'https://res.cloudinary.com/dsm9c4emg/image/upload/v1751077004/icono-perfil-usuario-estilo-plano-ilustracion-vector-avatar-miembro-sobre-fondo-aislado-concepto-negocio-signo-permiso-humano_157943-15752_ewx5pm.avif'
       const user = await this.findById(userId)
       if (!user) {
         throw new BadRequestException('User not found')
       }
+      const profile = await this.getUserProfile(userId)
 
       if (!imageUrl || typeof imageUrl !== 'string') {
         throw new BadRequestException('Invalid image URL provided')
       }
 
+      // 1. Eliminar la imagen anterior si existe y no es la imagen por defecto
+      const previousImageUrl =
+        profile && typeof profile === 'object' && 'image_url' in profile
+          ? (profile as { image_url?: string }).image_url
+          : undefined
+      console.log('previousImageUrl:', previousImageUrl)
+      if (previousImageUrl && previousImageUrl !== uriIfNoProfileImage) {
+        const public_id = this.extractPublicIdFromUrl(previousImageUrl)
+        console.log('public_id:', public_id)
+        if (public_id) {
+          try {
+            await cloudinary.uploader.destroy(public_id, { resource_type: 'image' })
+          } catch (e) {
+            console.error('Error deleting previous image from Cloudinary:', e)
+          }
+        }
+      }
+
+      // 2. Actualizar con la nueva imagen
       return await this.userModel.findByIdAndUpdate(
-        user._id, // Use the _id of the user
-        { image_url: imageUrl },
+        user._id,
+        { image_url: imageUrl }, // Actualizar la URL de la imagen
         { new: true },
       )
     } catch (error) {
@@ -70,11 +92,12 @@ export class UsersService {
 
   extractPublicIdFromUrl(url: string): string | null {
     try {
-      const parts = url.split('/')
-      const fileName = parts.at(-1)?.split('.')[0]
-      const folder = parts.at(-2)
-      if (!fileName || !folder) return null
-      return `${folder}/${fileName}` // Ej: uploads/abc123
+      // Busca la parte después de '/upload/' y antes de la extensión
+      const match = url.match(/\/upload\/(?:v\d+\/)?(.+)\.[a-zA-Z0-9]+$/)
+      if (match && match[1]) {
+        return match[1]
+      }
+      return null
     } catch {
       return null
     }
@@ -87,14 +110,13 @@ export class UsersService {
       }
       const public_id = this.extractPublicIdFromUrl(imageUrl)
       if (!public_id) {
-        throw new BadRequestException('Invalid image URL format')
+        throw new BadRequestException('Could not extract public_id from image URL')
       }
-
       const cloudResult = (await cloudinary.uploader.destroy(public_id, {
         resource_type: 'image',
       })) as { result?: string }
 
-      if (cloudResult.result !== 'ok') {
+      if (cloudResult.result !== 'ok' && cloudResult.result !== 'not found') {
         throw new BadRequestException('Error deleting image from Cloudinary')
       }
 
