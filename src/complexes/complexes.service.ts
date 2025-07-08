@@ -17,9 +17,16 @@ export class ComplexesService {
     @InjectModel('Rating') private ratingModel: Model<Rating>,
   ) {}
 
+  async getComplexIdByOwner(userId: string): Promise<string | null> {
+    const complex = await this.complexModel.findOne({ owner: userId })
+    if (!complex) {
+      throw new BadRequestException('Complex not found for the given owner')
+    }
+    return complex._id.toString() // Convertimos a string para mayor compatibilidad
+  }
+
   async userHasRoleOwner(userId: string) {
     const user = await this.userModel.findById(userId)
-
     return user && user.role === 'owner'
   }
 

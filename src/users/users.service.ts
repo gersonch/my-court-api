@@ -65,10 +65,9 @@ export class UsersService {
         profile && typeof profile === 'object' && 'image_url' in profile
           ? (profile as { image_url?: string }).image_url
           : undefined
-      console.log('previousImageUrl:', previousImageUrl)
+
       if (previousImageUrl && previousImageUrl !== uriIfNoProfileImage) {
         const public_id = this.extractPublicIdFromUrl(previousImageUrl)
-        console.log('public_id:', public_id)
         if (public_id) {
           try {
             await cloudinary.uploader.destroy(public_id, { resource_type: 'image' })
