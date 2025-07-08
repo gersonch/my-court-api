@@ -5,6 +5,7 @@ import { ITournament } from 'src/types/tournaments'
 import { CreateTournamentDto } from './dto/create-tournament.dto'
 import { User } from 'src/types/user'
 import { Complex } from 'src/types/complexes'
+import { UpdateTournamentAndOpenDto } from './dto/update-tournament-and-open.dto'
 
 @Injectable()
 export class TournamentsService {
@@ -75,5 +76,30 @@ export class TournamentsService {
       throw new BadRequestException('Tournament not found for this complex')
     }
     return deletedTournament
+  }
+
+  async updateAndOpenTournament(
+    tournamentId: string, //
+    userId: string,
+    data: UpdateTournamentAndOpenDto,
+  ): Promise<UpdateTournamentAndOpenDto> {
+    const complex = await this.getComplexByOwner(userId)
+    const tournament = await this.tournamentModel.findOne({ complexId: complex._id })
+
+    if (!tournament) {
+      throw new BadRequestException('Tournament not found for this complex')
+    }
+
+    const updatedTournament = await this.tournamentModel.findOneAndUpdate(
+      { _id: tournamentId, complexId: complex._id },
+      {
+        ...data,
+        state: 'open', // Ensure the state is set to 'open'
+      },
+      { new: true, runValidators: true },
+    )
+
+    // Assuming UpdateTournamentAndOpenDto matches the tournament document structure
+    return updatedTournament as unknown as UpdateTournamentAndOpenDto
   }
 }
