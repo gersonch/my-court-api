@@ -5,7 +5,16 @@ export const TournamentSchema = new Schema(
     name: String,
     sport: { type: String, enum: ['futbol', 'padel'], required: true },
     complexId: { type: Types.ObjectId, ref: 'Complex' },
-    category: String,
+    category: {
+      type: String,
+      enum: [
+        'Primera división', // First division
+        'Segunda división', // Second division
+        'Tercera división', // Third division
+        'Cuarta división', // Fourth division
+        'Quinta división', // Fifth division
+      ],
+    },
     startDate: Date,
     endDate: Date,
     state: {

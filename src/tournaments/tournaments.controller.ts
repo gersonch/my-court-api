@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Patch, Post } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common'
 import { TournamentsService } from './tournaments.service'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { Role } from 'src/common/guards/enums/rol.enum'
@@ -6,6 +6,7 @@ import { ActiveUser } from 'src/common/decorators/active-user.decorator'
 import { IUserActive } from 'src/common/interfaces/user-active.interface'
 import { CreateTournamentDto } from './dto/create-tournament.dto'
 import { UpdateTournamentAndOpenDto } from './dto/update-tournament-and-open.dto'
+import { TeamsDto } from './dto/add-teams-and-players.dto'
 
 @Controller('tournaments')
 export class TournamentsController {
@@ -35,5 +36,19 @@ export class TournamentsController {
       user.sub, //
       updateTournamentDto,
     )
+  }
+
+  @Auth(Role.OWNER)
+  @Patch('add-teams/:id')
+  async createTeams(@Param('id') tournamentId: string, @Body() teamsDto: TeamsDto) {
+    const tournament = await this.tournamentsService.getTournamentById(tournamentId)
+    const sport = tournament.sport
+    return this.tournamentsService.createTeams(tournamentId, sport, teamsDto)
+  }
+
+  @Auth(Role.OWNER)
+  @Get('teams/:id')
+  async getTeams(@Param('id') tournamentId: string) {
+    return this.tournamentsService.getTeamsForTournament(tournamentId)
   }
 }
