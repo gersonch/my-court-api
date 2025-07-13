@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model } from 'mongoose'
+import { Model, Types } from 'mongoose'
 import { ITournament } from 'src/types/tournaments'
 import { CreateTournamentDto } from './dto/create-tournament.dto'
 import { User } from 'src/types/user'
@@ -10,6 +10,7 @@ import { TeamsDto } from './dto/add-teams-and-players.dto'
 
 @Injectable()
 export class TournamentsService {
+  tournnamentModel: any
   constructor(
     @InjectModel('Tournament') private tournamentModel: Model<ITournament>,
     @InjectModel('User') private userModel: Model<User>,
@@ -211,5 +212,18 @@ export class TournamentsService {
       throw new BadRequestException('No teams found for this tournament')
     }
     return tournament.teams
+  }
+
+  async getTournamentByUserId(userId: string) {
+    const userIdObject = new Types.ObjectId(userId)
+
+    const tournaments = await this.tournamentModel.find({
+      'teams.players.userId': userIdObject,
+    })
+    if (!tournaments || tournaments.length === 0) {
+      throw new BadRequestException('No tournaments found for this user')
+    }
+
+    return tournaments
   }
 }

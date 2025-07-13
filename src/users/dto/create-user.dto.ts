@@ -4,4 +4,5 @@ export class CreateUserDto {
   password: string
   role: string
   refreshToken?: string
+  rut: string
 }

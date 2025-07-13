@@ -51,4 +51,10 @@ export class TournamentsController {
   async getTeams(@Param('id') tournamentId: string) {
     return this.tournamentsService.getTeamsForTournament(tournamentId)
   }
+
+  @Auth(Role.USER)
+  @Get('user/:id')
+  getTournamentByUserId(@Param('id') userId: string) {
+    return this.tournamentsService.getTournamentByUserId(userId)
+  }
 }

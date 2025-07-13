@@ -1,7 +1,7 @@
 import {
   BadRequestException,
-  Injectable, //comentario para que se vea uno abajo del otro
-  InternalServerErrorException,
+  Injectable,
+  InternalServerErrorException, //comentario para que se vea uno abajo del otro
   UnauthorizedException,
 } from '@nestjs/common'
 import { UsersService } from 'src/users/users.service'
@@ -10,6 +10,7 @@ import { LoginDto } from './dto/login.dto'
 import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { IAuthUser } from './interfaces/auth-user.interface'
+import { validateRut } from '@fdograph/rut-utilities'
 
 @Injectable()
 export class AuthService {
@@ -57,50 +58,58 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    const user = await this.usersService.findOne(registerDto.email)
-    if (user) {
-      throw new BadRequestException('User already exists')
+    try {
+      const user = await this.usersService.findOne(registerDto.email)
+      if (user) {
+        throw new BadRequestException('User already exists')
+      }
+
+      const exixtingRut = await this.usersService.findOne(registerDto.rut)
+      if (exixtingRut) {
+        throw new BadRequestException('RUT already exists')
+      }
+      console.log(registerDto.rut)
+
+      const isRutValid: boolean = validateRut(registerDto.rut)
+
+      if (!isRutValid) {
+        throw new BadRequestException('Invalid RUT format')
+      }
+
+      // Sobrescribe el rut con el formato correcto antes de crear el usuario
+      await this.usersService.create(registerDto)
+      return { name: registerDto.name, email: registerDto.email }
+    } catch {
+      throw new InternalServerErrorException('Error registering user')
     }
-    await this.usersService.create(registerDto)
-    return { name: registerDto.name, email: registerDto.email }
   }
 
   async login({ email, password }: LoginDto) {
-    const user = await this.validateUser(email, password)
-
-    const payload = { email: user.email, role: user.role, sub: user.id }
-    const token = this.jwtService.sign(payload, { expiresIn: '15m' })
-    const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: '7d',
-      secret: process.env.JWT_REFRESH_SECRET,
-    })
-
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10)
-    await this.usersService.updateRefreshToken(user.id, hashedRefreshToken)
-
-    return {
-      token,
-      refreshToken,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-    }
-  }
-
-  async profile({ email, role }: { email: string; role: string }) {
     try {
-      const profile = await this.usersService.findOne(email)
+      const user = await this.validateUser(email, password)
 
-      if (!profile) {
-        throw new BadRequestException('User not found')
+      const payload = { email: user.email, role: user.role, sub: user.id }
+      const token = this.jwtService.sign(payload, { expiresIn: '15m' })
+      const refreshToken = this.jwtService.sign(payload, {
+        expiresIn: '7d',
+        secret: process.env.JWT_REFRESH_SECRET,
+      })
+
+      const hashedRefreshToken = await bcrypt.hash(refreshToken, 10)
+      await this.usersService.updateRefreshToken(user.id, hashedRefreshToken)
+
+      return {
+        token,
+        refreshToken,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
       }
-
-      return profile
     } catch {
-      throw new InternalServerErrorException('Error fetching user profile')
+      throw new InternalServerErrorException('Error logging in')
     }
   }
 }

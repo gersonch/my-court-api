@@ -18,6 +18,7 @@ export const UserSchema = new Schema({
   role: { type: 'string', default: Role.USER, required: true, enum: Object.values(Role) },
   refreshToken: { type: String, required: false },
   image_url: { type: String, required: false, default: image_url },
+  rut: { type: String, required: true, unique: true },
 })
 
 import type { CallbackError } from 'mongoose'

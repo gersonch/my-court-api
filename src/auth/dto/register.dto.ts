@@ -42,4 +42,7 @@ export class RegisterDto {
   @IsString()
   @IsOptional()
   image_url: string
+
+  @IsString()
+  rut: string
 }
