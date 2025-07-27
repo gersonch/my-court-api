@@ -112,4 +112,20 @@ export class AuthService {
       throw new InternalServerErrorException('Error logging in')
     }
   }
+
+  async validateGoogleUser(googleUser: { email: string; firstName: string }) {
+    let user = await this.usersService.findOne(googleUser.email)
+    if (!user) {
+      user = await this.usersService.create({
+        email: googleUser.email,
+        name: googleUser.firstName,
+        rut: 'google',
+        password: 'google',
+      })
+    }
+
+    const payload = { email: user.email, role: user.role, sub: user._id }
+    const token = this.jwtService.sign(payload, { expiresIn: '15m' })
+    return { token, user }
+  }
 }

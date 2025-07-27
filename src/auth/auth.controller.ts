@@ -1,9 +1,10 @@
-import { Body, Controller, Post, Req, Res, UnauthorizedException } from '@nestjs/common'
+import { Body, Controller, Get, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { RegisterDto } from './dto/register.dto'
 import { LoginDto } from './dto/login.dto'
 import { Response, Request } from 'express'
 import { JwtService } from '@nestjs/jwt'
+import { AuthGuard } from '@nestjs/passport'
 
 @Controller('auth')
 export class AuthController {
@@ -79,6 +80,18 @@ export class AuthController {
     res.clearCookie('token')
     res.clearCookie('refreshToken')
     return { message: 'Logged out successfully' }
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() {}
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req, @Res({ passthrough: true }) res: Response) {
+    const result = await this.authService.validateGoogleUser(req.user)
+    res.cookie('token', result.token, { httpOnly: true })
+    return result
   }
 
   // @Get('profile')

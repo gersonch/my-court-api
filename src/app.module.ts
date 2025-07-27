@@ -7,7 +7,7 @@ import { AuthModule } from './auth/auth.module'
 import { FieldsModule } from './fields/fields.module'
 
 import { RatingModule } from './rating/rating.module'
-import { TournamentsModule } from './tournaments/tournaments.module';
+import { TournamentsModule } from './tournaments/tournaments.module'
 
 @Module({
   imports: [
