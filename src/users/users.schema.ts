@@ -9,7 +9,13 @@ export const UserSchema = new Schema({
   name: String,
   lastName: { type: String, required: false, default: '' },
   email: { type: String, unique: true, required: true },
-  password: { type: String, required: true, select: false },
+  password: {
+    type: String,
+    required: function (this: { provider: string }) {
+      return this.provider === 'local'
+    },
+    select: false,
+  },
   phone: { type: String, required: false, unique: true, default: '' },
   country: { type: String, required: false, default: '' },
   address: { type: String, required: false, default: '' },
@@ -18,7 +24,14 @@ export const UserSchema = new Schema({
   role: { type: 'string', default: Role.USER, required: true, enum: Object.values(Role) },
   refreshToken: { type: String, required: false },
   image_url: { type: String, required: false, default: image_url },
-  rut: { type: String, required: true, unique: true },
+  rut: {
+    type: String,
+    required: function (this: { provider: string }) {
+      return this.provider === 'local'
+    },
+    unique: true,
+  },
+  provider: { type: String, default: 'local', enum: ['local', 'google'] },
 })
 
 import type { CallbackError } from 'mongoose'
@@ -29,6 +42,9 @@ UserSchema.pre('save', async function (next) {
 
   try {
     const salt = await bcrypt.genSalt(10)
+    if (!this.password) {
+      throw new Error('Password is required for hashing')
+    }
     this.password = await bcrypt.hash(this.password, salt)
     next()
   } catch (error) {

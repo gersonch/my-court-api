@@ -61,6 +61,11 @@ export class AuthService {
     try {
       const user = await this.usersService.findOne(registerDto.email)
       if (user) {
+        if (user.provider && user.provider !== 'local') {
+          throw new BadRequestException(
+            `Este usuario ya existe con el proveedor ${user.provider}. Inicia sesión con ${user.provider}.`,
+          )
+        }
         throw new BadRequestException('User already exists')
       }
 
@@ -68,16 +73,13 @@ export class AuthService {
       if (exixtingRut) {
         throw new BadRequestException('RUT already exists')
       }
-      console.log(registerDto.rut)
 
       const isRutValid: boolean = validateRut(registerDto.rut)
-
       if (!isRutValid) {
         throw new BadRequestException('Invalid RUT format')
       }
 
-      // Sobrescribe el rut con el formato correcto antes de crear el usuario
-      await this.usersService.create(registerDto)
+      await this.usersService.create({ ...registerDto, provider: 'local' })
       return { name: registerDto.name, email: registerDto.email }
     } catch {
       throw new InternalServerErrorException('Error registering user')
@@ -86,9 +88,19 @@ export class AuthService {
 
   async login({ email, password }: LoginDto) {
     try {
-      const user = await this.validateUser(email, password)
+      const user = await this.usersService.findOne(email)
+      if (user && user.provider && user.provider !== 'local') {
+        throw new BadRequestException(
+          `Este usuario ya existe con el proveedor ${user.provider}. Inicia sesión con ${user.provider}.`,
+        )
+      }
+      const validatedUser = await this.validateUser(email, password)
 
-      const payload = { email: user.email, role: user.role, sub: user.id }
+      const payload = {
+        email: validatedUser.email,
+        role: validatedUser.role,
+        sub: validatedUser.id,
+      }
       const token = this.jwtService.sign(payload, { expiresIn: '15m' })
       const refreshToken = this.jwtService.sign(payload, {
         expiresIn: '7d',
@@ -96,16 +108,16 @@ export class AuthService {
       })
 
       const hashedRefreshToken = await bcrypt.hash(refreshToken, 10)
-      await this.usersService.updateRefreshToken(user.id, hashedRefreshToken)
+      await this.usersService.updateRefreshToken(validatedUser.id, hashedRefreshToken)
 
       return {
         token,
         refreshToken,
         user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
+          id: validatedUser.id,
+          name: validatedUser.name,
+          email: validatedUser.email,
+          role: validatedUser.role,
         },
       }
     } catch {
@@ -119,8 +131,7 @@ export class AuthService {
       user = await this.usersService.create({
         email: googleUser.email,
         name: googleUser.firstName,
-        rut: 'google',
-        password: 'google',
+        provider: 'google',
       })
     }
 

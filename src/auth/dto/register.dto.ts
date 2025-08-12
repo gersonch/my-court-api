@@ -2,7 +2,7 @@ import { IsEmail, IsNumber, IsOptional, IsString, MinLength } from 'class-valida
 import { Transform } from 'class-transformer'
 
 export class RegisterDto {
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }: { value: string }) => value.trim())
   @IsString()
   @MinLength(2)
   name: string
@@ -10,7 +10,7 @@ export class RegisterDto {
   @IsEmail()
   email: string
 
-  @Transform(({ value }) => value.trim())
+  @Transform(({ value }: { value: string }) => value.trim())
   @IsString()
   @MinLength(6)
   password: string
@@ -45,4 +45,7 @@ export class RegisterDto {
 
   @IsString()
   rut: string
+
+  @IsString()
+  provider: string
 }
