@@ -7,5 +7,6 @@ export const ReservationSchema = new Schema({
   startTime: { type: Date, required: true },
   duration: { type: String, required: true },
   price: { type: Number, required: true },
+  status: { type: String, enum: ['confirmed', 'canceled'], default: 'confirmed' },
   createdAt: { type: Date, default: Date.now },
 })
