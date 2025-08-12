@@ -11,39 +11,30 @@ export class FieldsService {
     @InjectModel('Complex') private readonly complexModel: Model<Complex>,
   ) {}
 
-  // ownerId will be accessed via the ActiveUser decorator, in the controller
-  async createForOwner(ownerId: string, fieldDto: CreateFieldDto) {
-    // Find the complex associated with the owner
-    const complex = await this.complexModel.findOne({ owner: ownerId })
-    // If no complex is found for the owner, throw an error
+  async createField(createFieldDto: CreateFieldDto) {
+    const { complexId, name } = createFieldDto
+    const complex = await this.complexModel.findById(complexId).exec()
     if (!complex) {
-      throw new BadRequestException('Complex not found for the given owner')
+      throw new BadRequestException('Complex not found')
+    }
+    const field = await this.fieldModel.find({ name, complexId })
+    if (field && field.length > 0) {
+      throw new BadRequestException('Field already exists')
     }
 
-    //max 10 field per complex
-    const fieldCount = await this.fieldModel.countDocuments({ complexId: complex._id })
-    if (fieldCount >= 10) {
-      throw new BadRequestException('Maximum of 10 fields per complex reached')
+    const created = new this.fieldModel(createFieldDto)
+    return created.save()
+  }
+
+  async findById(id: string) {
+    return this.fieldModel.findById(id).exec()
+  }
+
+  async getFieldsByComplex(complexId: string) {
+    const complex = await this.complexModel.findById(complexId)
+    if (!complex) {
+      throw new Error('Complex not found')
     }
-
-    // Create a new field using fieldDto and attach the complexId
-    const createdField = new this.fieldModel({
-      ...fieldDto,
-      complexId: complex._id,
-    })
-    return createdField.save()
-  }
-
-  create(fieldDto: CreateFieldDto) {
-    const createdField = new this.fieldModel(fieldDto)
-    return createdField.save()
-  }
-
-  findAll() {
-    return this.fieldModel.find().exec()
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} field`
+    return this.fieldModel.find({ complexId: complexId })
   }
 }

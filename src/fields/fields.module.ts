@@ -17,5 +17,6 @@ import { ComplexesModule } from 'src/complexes/complexes.module'
   ],
   controllers: [FieldsController],
   providers: [FieldsService],
+  exports: [FieldsService],
 })
 export class FieldsModule {}

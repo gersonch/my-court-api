@@ -8,6 +8,7 @@ import { FieldsModule } from './fields/fields.module'
 
 import { RatingModule } from './rating/rating.module'
 import { TournamentsModule } from './tournaments/tournaments.module'
+import { ReservationsModule } from './reservations/reservations.module'
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { TournamentsModule } from './tournaments/tournaments.module'
     FieldsModule,
     RatingModule,
     TournamentsModule,
+    ReservationsModule,
   ],
 })
 export class AppModule {}

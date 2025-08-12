@@ -91,6 +91,7 @@ export class AuthController {
   async googleAuthRedirect(@Req() req, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.validateGoogleUser(req.user)
     res.cookie('token', result.token, { httpOnly: true })
+    res.redirect(`exp://192.168.1.4:3000?token=${result.token}`)
     return result
   }
 

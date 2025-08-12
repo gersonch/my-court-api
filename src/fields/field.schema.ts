@@ -1,17 +1,25 @@
 import { Schema } from 'mongoose'
 
+const PricePerDurationSchema = new Schema(
+  {
+    price: { type: Number, required: true },
+    duration: { type: String, required: true },
+  },
+  { _id: false },
+) // No queremos un _id para este subdocumento
+const TimeBlockSchema = new Schema(
+  {
+    dayOfWeek: { type: Number, required: true },
+    from: { type: String, required: true }, // Hora de inicio
+    to: { type: String, required: true }, // Hora de fin
+    prices: [PricePerDurationSchema],
+  },
+  { _id: false },
+) // No queremos un _id para este subdocumento
+
 export const FieldSchema = new Schema({
   name: { type: String, required: true },
   type: { type: String, required: true },
   complexId: { type: Schema.Types.ObjectId, ref: 'Complex' },
-
-  schedule: {
-    monday: [{ start: String, end: String }],
-    tuesday: [{ start: String, end: String }],
-    wednesday: [{ start: String, end: String }],
-    thursday: [{ start: String, end: String }],
-    friday: [{ start: String, end: String }],
-    saturday: [{ start: String, end: String }],
-    sunday: [{ start: String, end: String }],
-  },
+  availability: { type: [TimeBlockSchema], required: true },
 })

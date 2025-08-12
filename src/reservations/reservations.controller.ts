@@ -1,22 +1,26 @@
-import { Controller, Get, Param, Delete } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post } from '@nestjs/common'
 import { ReservationsService } from './reservations.service'
+import { CreateReservationDto } from './dto/create-reservation.dto'
+import { Auth } from 'src/auth/decorators/auth.decorator'
+import { Role } from 'src/common/guards/enums/rol.enum'
 
 @Controller('reservations')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}
 
-  @Get()
-  findAll() {
-    return this.reservationsService.findAll()
+  @Auth(Role.USER)
+  @Post()
+  create(@Body() body: CreateReservationDto) {
+    return this.reservationsService.createReservation(body)
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reservationsService.findOne(+id)
+  @Get(':fieldId')
+  getReservations(@Param('fieldId') fieldId: string) {
+    return this.reservationsService.getReservations(fieldId)
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reservationsService.remove(+id)
+  @Get('user/:userId')
+  getReservationsByUser(@Param('userId') userId: string) {
+    return this.reservationsService.getReservationsByUserFromDate(userId)
   }
 }

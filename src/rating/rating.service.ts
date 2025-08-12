@@ -34,7 +34,7 @@ export class RatingService {
     // si existe, lanza un BadRequestException
     const existingRating = await this.ratingModel.findOne({ userId, complexId })
     if (existingRating) {
-      throw new BadRequestException('You have already rated this complex.')
+      throw new BadRequestException('Ya has calificado este complejo.')
     }
 
     const createdRating = new this.ratingModel({ ...createRatingDto, userId, complexId })

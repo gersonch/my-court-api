@@ -39,7 +39,7 @@ export class UsersService {
   async getUserProfile(id: string) {
     return await this.userModel
       .findById(id)
-      .select(['name', 'email', 'image_url', 'country', 'city', 'address', 'phone'])
+      .select(['name', 'email', 'image_url', 'country', 'city', 'address', 'phone', 'rut'])
   }
 
   async updateUserProfile(id: string, userProfile: Partial<UserProfileDto>) {
