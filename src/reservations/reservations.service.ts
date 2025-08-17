@@ -20,6 +20,10 @@ export class ReservationsService {
     if (!field) {
       throw new BadRequestException('Field not found')
     }
+    // validate if reservations is future not past
+    if (new Date(createReservationDto.startTime) < new Date()) {
+      throw new BadRequestException('Reservation time must be in the future')
+    }
     // Validate if is schedule available
     const existingReservation = await this.reservationModel.findOne({
       startTime: createReservationDto.startTime,

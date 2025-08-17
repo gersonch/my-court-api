@@ -4,6 +4,8 @@ import { CreateReservationDto } from './dto/create-reservation.dto'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { Role } from 'src/common/guards/enums/rol.enum'
 import { Types } from 'mongoose'
+import { ActiveUser } from 'src/common/decorators/active-user.decorator'
+import { IUserActive } from 'src/common/interfaces/user-active.interface'
 
 @Controller('reservations')
 export class ReservationsController {
@@ -15,25 +17,27 @@ export class ReservationsController {
     return this.reservationsService.createReservation(body)
   }
 
+  @Auth(Role.USER)
+  @Get('user')
+  getReservationsByUser(@ActiveUser() userId: IUserActive) {
+    if (!Types.ObjectId.isValid(userId.sub)) {
+      throw new BadRequestException('Invalid userId format')
+    }
+    return this.reservationsService.getReservationsByUserFromDate(userId.sub)
+  }
+
   @Get(':fieldId')
   getReservations(@Param('fieldId') fieldId: string) {
     return this.reservationsService.getReservations(fieldId)
   }
 
-  @Get('user/:userId')
-  getReservationsByUser(@Param('userId') userId: string) {
-    if (!Types.ObjectId.isValid(userId)) {
+  @Auth(Role.USER)
+  @Get('user/history')
+  getReservationsByUserFromDate(@ActiveUser() userId: IUserActive, @Query('limit') limit: string) {
+    if (!Types.ObjectId.isValid(userId.sub)) {
       throw new BadRequestException('Invalid userId format')
     }
-    return this.reservationsService.getReservationsByUserFromDate(userId)
-  }
-
-  @Get('user/:userId/history')
-  getReservationsByUserFromDate(@Param('userId') userId: string, @Query('limit') limit: string) {
-    if (!Types.ObjectId.isValid(userId)) {
-      throw new BadRequestException('Invalid userId format')
-    }
-    return this.reservationsService.getHistoryReservationsByUser(userId, Number(limit))
+    return this.reservationsService.getHistoryReservationsByUser(userId.sub, Number(limit))
   }
   @Patch(':reservationId/cancel')
   cancelReservation(@Param('reservationId') reservationId: string) {
