@@ -69,8 +69,8 @@ export class AuthService {
         throw new BadRequestException('User already exists')
       }
 
-      const exixtingRut = await this.usersService.findOne(registerDto.rut)
-      if (exixtingRut) {
+      const existingRut = await this.usersService.findByRut(registerDto.rut)
+      if (existingRut) {
         throw new BadRequestException('RUT already exists')
       }
 
@@ -79,10 +79,14 @@ export class AuthService {
         throw new BadRequestException('Invalid RUT format')
       }
 
-      await this.usersService.create({ ...registerDto, provider: 'local' })
+      const data = { ...registerDto, provider: 'local' }
+
+      await this.usersService.create(data)
       return { name: registerDto.name, email: registerDto.email }
-    } catch {
-      throw new InternalServerErrorException('Error registering user')
+    } catch (error: unknown) {
+      // eslint-disable-next-line prettier/prettier
+      const message = error instanceof Error ? error.message : typeof error === 'string' ? error : 'Unknown error'
+      throw new InternalServerErrorException('Error registering user', message)
     }
   }
 

@@ -1,3 +1,4 @@
+// eslint-disable-next-line prettier/prettier
 import { Body, Controller, Get, Param, Post, Query, BadRequestException, Patch } from '@nestjs/common'
 import { ReservationsService } from './reservations.service'
 import { CreateReservationDto } from './dto/create-reservation.dto'
@@ -28,6 +29,9 @@ export class ReservationsController {
 
   @Get(':fieldId')
   getReservations(@Param('fieldId') fieldId: string) {
+    if (!Types.ObjectId.isValid(fieldId)) {
+      throw new BadRequestException('Invalid fieldId format')
+    }
     return this.reservationsService.getReservations(fieldId)
   }
 
@@ -39,6 +43,8 @@ export class ReservationsController {
     }
     return this.reservationsService.getHistoryReservationsByUser(userId.sub, Number(limit))
   }
+
+  @Auth(Role.USER)
   @Patch(':reservationId/cancel')
   cancelReservation(@Param('reservationId') reservationId: string) {
     if (!Types.ObjectId.isValid(reservationId)) {

@@ -1,3 +1,4 @@
+// eslint-disable-next-line prettier/prettier
 import { Body, Controller, Get, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { RegisterDto } from './dto/register.dto'
@@ -46,9 +47,8 @@ export class AuthController {
   async refreshToken(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response, // Use Res to manipulate cookies
-    @Body('refreshToken') bodyToken: string, // Optional: you can also get it from the body
   ) {
-    const refreshToken = req.cookies?.refreshToken || bodyToken
+    const refreshToken = (req.cookies as Record<string, string | undefined>)?.refreshToken
     if (!refreshToken) throw new UnauthorizedException('Refresh token is missing')
     const user = await this.authService.refresh(refreshToken)
 
@@ -95,6 +95,14 @@ export class AuthController {
     return result
   }
 
+  @Get('google/mobile')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthMobile(@Req() req, @Res({ passthrough: true }) res: Response) {
+    const result = await this.authService.validateGoogleUser(req.user)
+
+    res.redirect(`com.negors.hola?token=${result.token}`)
+    return result
+  }
   // @Get('profile')
   // @UseGuards(AuthGuard)
   // @Roles('admin')

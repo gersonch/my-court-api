@@ -31,7 +31,7 @@ export const UserSchema = new Schema({
     },
     unique: true,
   },
-  provider: { type: String, default: 'local', enum: ['local', 'google'] },
+  provider: { type: String, default: 'local', enum: ['local', 'google'], required: true },
 })
 
 import type { CallbackError } from 'mongoose'

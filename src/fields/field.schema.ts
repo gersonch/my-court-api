@@ -23,3 +23,6 @@ export const FieldSchema = new Schema({
   complexId: { type: Schema.Types.ObjectId, ref: 'Complex' },
   availability: { type: [TimeBlockSchema], required: true },
 })
+
+// Índice para buscar canchas por complejo
+FieldSchema.index({ complexId: 1 })

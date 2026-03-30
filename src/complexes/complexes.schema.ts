@@ -36,3 +36,8 @@ export const ComplexSchema = new Schema(
   },
   { timestamps: true },
 )
+
+// Índice para buscar complejos por dueño
+ComplexSchema.index({ owner: 1 })
+// Índice compuesto para búsqueda por ubicación
+ComplexSchema.index({ city: 1, region: 1 })

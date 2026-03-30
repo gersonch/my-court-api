@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { CreateReservationDto } from './dto/create-reservation.dto'
-import { Model } from 'mongoose'
+import { Model, Types } from 'mongoose'
 import { CreateFieldDto } from 'src/fields/dto/create-field.dto'
 import { Complex } from 'src/types/complexes'
 import { IReservation } from 'src/types/reservation'
@@ -10,7 +10,7 @@ import { IReservation } from 'src/types/reservation'
 export class ReservationsService {
   constructor(
     @InjectModel('Reservation') private readonly reservationModel: Model<IReservation>,
-    @InjectModel('Field') private readonly fieldModel: Model<CreateFieldDto>, // Replace 'any' with the actual Field type
+    @InjectModel('Field') private readonly fieldModel: Model<CreateFieldDto>,
     @InjectModel('Complex') private readonly complexModel: Model<Complex>,
   ) {}
 
@@ -37,46 +37,76 @@ export class ReservationsService {
   }
 
   async getReservations(fieldId: string) {
-    const reservations = await this.reservationModel.find({ fieldId, status: 'confirmed' })
-    if (!reservations) {
-      throw new BadRequestException('No reservations found for this field')
-    }
-    return reservations
+    const now = new Date()
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const endDate = new Date(startOfToday.getTime() + 7 * 24 * 60 * 60 * 1000) // +7 días
+    return await this.reservationModel
+      .find({
+        fieldId: new Types.ObjectId(fieldId),
+        status: 'confirmed',
+        startTime: { $gte: startOfToday, $lte: endDate },
+      })
+      .select('startTime duration')
+      .sort({ startTime: 1 })
   }
 
   async getReservationsByUserFromDate(userId: string) {
     const fromDate = new Date()
-    // get all reservations from fromDate
     if (!userId) throw new BadRequestException('User ID is required')
 
-    const reservation = await this.reservationModel.find({
-      userId,
-      startTime: { $gte: fromDate },
-      status: { $in: ['confirmed', 'canceled'] },
-    })
-    if (!reservation || reservation.length === 0) {
+    // Usar aggregation para hacer $lookup en lugar de N+1 queries
+    const reservations: IReservation[] = await this.reservationModel.aggregate([
+      {
+        $match: {
+          userId: new Types.ObjectId(userId),
+          startTime: { $gte: fromDate },
+          status: { $in: ['confirmed', 'canceled'] },
+        },
+      },
+      {
+        $lookup: {
+          from: 'fields',
+          localField: 'fieldId',
+          foreignField: '_id',
+          as: 'field',
+        },
+      },
+      {
+        $lookup: {
+          from: 'complexes',
+          localField: 'complexId',
+          foreignField: '_id',
+          as: 'complex',
+        },
+      },
+      {
+        $unwind: { path: '$field', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: '$complex', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 1,
+          fieldId: { $toString: '$fieldId' },
+          userId: { $toString: '$userId' },
+          complexId: { $toString: '$complexId' },
+          startTime: 1,
+          duration: 1,
+          price: 1,
+          status: 1,
+          createdAt: 1,
+          fieldName: { $ifNull: ['$field.name', ''] },
+          complexName: { $ifNull: ['$complex.name', ''] },
+        },
+      },
+      {
+        $sort: { startTime: 1 },
+      },
+    ])
+
+    if (!reservations || reservations.length === 0) {
       throw new BadRequestException('No reservations found for this user from the specified date')
-    }
-    type ReservationWithNames = CreateReservationDto & { fieldName: string; complexName: string }
-    const reservations: ReservationWithNames[] = []
-
-    for (const res of reservation) {
-      const field = await this.fieldModel.findById(res.fieldId)
-      const complex = await this.complexModel.findById(res.complexId)
-
-      if (field && complex) {
-        const resObj = res.toObject()
-        reservations.push({
-          ...resObj,
-          fieldId: resObj.fieldId.toString(), //
-          userId: resObj.userId.toString(),
-          complexId: resObj.complexId.toString(),
-          startTime: resObj.startTime instanceof Date ? resObj.startTime.toISOString() : resObj.startTime,
-
-          fieldName: field.name,
-          complexName: complex.name,
-        })
-      }
     }
 
     return reservations
@@ -85,34 +115,66 @@ export class ReservationsService {
   async getHistoryReservationsByUser(userId: string, limit: number) {
     const toDate = new Date()
     if (!userId) throw new BadRequestException('User ID is required')
+    if (isNaN(limit) || limit <= 0) {
+      throw new BadRequestException('limit must be a number greater than 0')
+    }
 
-    const reservation = await this.reservationModel
-      .find({ userId, startTime: { $lt: toDate }, status: { $in: ['confirmed', 'canceled'] } }) //
-      .limit(limit)
-    if (!reservation || reservation.length === 0) {
+    // Usar aggregation para hacer $lookup en lugar de N+1 queries
+    const reservations: IReservation[] = await this.reservationModel.aggregate([
+      {
+        $match: {
+          userId: new Types.ObjectId(userId),
+          startTime: { $lt: toDate },
+          status: { $in: ['confirmed', 'canceled'] },
+        },
+      },
+      {
+        $lookup: {
+          from: 'fields',
+          localField: 'fieldId',
+          foreignField: '_id',
+          as: 'field',
+        },
+      },
+      {
+        $lookup: {
+          from: 'complexes',
+          localField: 'complexId',
+          foreignField: '_id',
+          as: 'complex',
+        },
+      },
+      {
+        $unwind: { path: '$field', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: '$complex', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 1,
+          fieldId: { $toString: '$fieldId' },
+          userId: { $toString: '$userId' },
+          complexId: { $toString: '$complexId' },
+          startTime: 1,
+          duration: 1,
+          price: 1,
+          status: 1,
+          createdAt: 1,
+          fieldName: { $ifNull: ['$field.name', ''] },
+          complexName: { $ifNull: ['$complex.name', ''] },
+        },
+      },
+      {
+        $sort: { startTime: -1 },
+      },
+      { $limit: limit },
+    ])
+
+    if (!reservations || reservations.length === 0) {
       throw new BadRequestException('No reservations found for this user in the history')
     }
 
-    type ReservationWithNames = CreateReservationDto & { fieldName: string; complexName: string }
-    const reservations: ReservationWithNames[] = []
-
-    for (const res of reservation) {
-      const field = await this.fieldModel.findById(res.fieldId)
-      const complex = await this.complexModel.findById(res.complexId)
-
-      if (field && complex) {
-        const resObj = res.toObject()
-        reservations.push({
-          ...resObj,
-          fieldId: resObj.fieldId.toString(),
-          userId: resObj.userId.toString(),
-          complexId: resObj.complexId.toString(),
-          startTime: resObj.startTime instanceof Date ? resObj.startTime.toISOString() : resObj.startTime,
-          fieldName: field.name,
-          complexName: complex.name,
-        })
-      }
-    }
     return reservations
   }
 

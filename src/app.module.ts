@@ -5,10 +5,11 @@ import { UsersModule } from './users/users.module'
 import { ComplexesModule } from './complexes/complexes.module'
 import { AuthModule } from './auth/auth.module'
 import { FieldsModule } from './fields/fields.module'
-
 import { RatingModule } from './rating/rating.module'
 import { TournamentsModule } from './tournaments/tournaments.module'
 import { ReservationsModule } from './reservations/reservations.module'
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
+import { APP_GUARD } from '@nestjs/core'
 
 @Module({
   imports: [
@@ -27,6 +28,13 @@ import { ReservationsModule } from './reservations/reservations.module'
       },
       inject: [ConfigService],
     }),
+    ThrottlerModule.forRoot([
+      {
+        // Limite de 5 solicitudes por minuto para rutas generales
+        ttl: 10000 * 6, // 1 minuto
+        limit: 100, // 100 solicitudes por minuto
+      },
+    ]),
     UsersModule,
     ComplexesModule,
     AuthModule,
@@ -34,6 +42,12 @@ import { ReservationsModule } from './reservations/reservations.module'
     RatingModule,
     TournamentsModule,
     ReservationsModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}

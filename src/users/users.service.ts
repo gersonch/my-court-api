@@ -22,6 +22,11 @@ export class UsersService {
     return user
   }
 
+  async findByRut(rut: string) {
+    const user = await this.userModel.findOne({ rut: rut })
+    return user
+  }
+
   async findById(id: string) {
     return this.userModel.findById(id)
   }

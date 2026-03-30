@@ -46,6 +46,7 @@ export class RegisterDto {
   @IsString()
   rut: string
 
+  @IsOptional()
   @IsString()
   provider: string
 }
