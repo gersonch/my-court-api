@@ -1,3 +1,4 @@
+// eslint-disable-next-line prettier/prettier
 import { Controller, Get, Post, Body, Param, Patch, UseInterceptors, UploadedFile } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/create-user.dto'

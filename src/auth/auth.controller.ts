@@ -46,9 +46,11 @@ export class AuthController {
   @Post('refresh')
   async refreshToken(
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response, // Use Res to manipulate cookies
+    @Res({ passthrough: true }) res: Response,
+    @Body('refreshToken') bodyToken: string, // Use Res to manipulate cookies
   ) {
-    const refreshToken = (req.cookies as Record<string, string | undefined>)?.refreshToken
+    // eslint-disable-next-line prettier/prettier
+    const refreshToken = (req.cookies as Record<string, string | undefined>)?.refreshToken || bodyToken
     if (!refreshToken) throw new UnauthorizedException('Refresh token is missing')
     const user = await this.authService.refresh(refreshToken)
 
