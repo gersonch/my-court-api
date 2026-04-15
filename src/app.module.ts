@@ -30,7 +30,6 @@ import { APP_GUARD } from '@nestjs/core'
     }),
     ThrottlerModule.forRoot([
       {
-        // Limite de 5 solicitudes por minuto para rutas generales
         ttl: 10000 * 6, // 1 minuto
         limit: 100, // 100 solicitudes por minuto
       },

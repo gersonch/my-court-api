@@ -1,5 +1,5 @@
 //prettier-ignore
-import { Controller, Get, Post, Body, BadRequestException, Put, UseInterceptors, UploadedFile, Patch, Param } from '@nestjs/common'
+import { Controller, Get, Post, Body, BadRequestException, Put, UseInterceptors, UploadedFile, Patch, Param, Query } from '@nestjs/common'
 import { ComplexesService } from './complexes.service'
 import { createComplexesDto, updateComplexDto } from './dto/create-complexes.dto'
 import { Auth } from 'src/auth/decorators/auth-passport.decorator'
@@ -8,6 +8,7 @@ import { ActiveUser } from 'src/common/decorators/active-user.decorator'
 import { IUserActive } from 'src/common/interfaces/user-active.interface'
 import { CloudinaryFileInterceptor } from './decorators/cloudinary-interceptor.decorator'
 import { RatingService } from 'src/rating/rating.service'
+import { PaginationQueryDto } from 'src/common/dto/pagination.dto'
 
 interface MulterFileWithPath extends Express.Multer.File {
   path: string
@@ -38,8 +39,8 @@ export class ComplexesController {
   }
 
   @Get()
-  findAll() {
-    return this.complexService.findAll()
+  findAll(@Query() pagination: PaginationQueryDto) {
+    return this.complexService.findAllPaginated(pagination.page, pagination.limit)
   }
 
   @Get('id')

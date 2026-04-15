@@ -5,9 +5,6 @@ export class CreateReservationDto {
   fieldId: string
 
   @IsMongoId()
-  userId: string
-
-  @IsMongoId()
   complexId: string
 
   @IsNotEmpty()

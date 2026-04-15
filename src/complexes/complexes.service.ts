@@ -5,6 +5,7 @@ import { createComplexesDto, updateComplexDto } from './dto/create-complexes.dto
 import { User } from 'src/types/user'
 import { cloudinary } from 'src/config/cloudinary.config'
 import { Rating } from 'src/rating/rating.service'
+import { createPaginatedResponse } from 'src/common/dto/pagination.dto'
 
 interface CloudinaryDestroyResponse {
   result: string
@@ -50,6 +51,22 @@ export class ComplexesService {
 
   findAll() {
     return this.complexModel.find()
+  }
+
+  /**
+   * Obtiene todos los complejos con paginación
+   * @param page - Número de página (1-indexed)
+   * @param limit - Items por página
+   */
+  async findAllPaginated(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit
+
+    const [data, total] = await Promise.all([
+      this.complexModel.find().skip(skip).limit(limit).exec(),
+      this.complexModel.countDocuments(),
+    ])
+
+    return createPaginatedResponse(data, page, limit, total)
   }
 
   async addImageUrl(userId: string, imageUrl: string) {

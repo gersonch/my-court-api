@@ -1,11 +1,23 @@
-// eslint-disable-next-line prettier/prettier
-import { Controller, Get, Post, Body, Param, Patch, UseInterceptors, UploadedFile } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  UseInterceptors,
+  UploadedFile,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/create-user.dto'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { Role } from 'src/common/guards/enums/rol.enum'
 import { UserProfileDto } from './dto/user-profile.dto'
 import { CloudinaryFileInterceptor } from 'src/complexes/decorators/cloudinary-interceptor.decorator'
+import { ActiveUser } from 'src/common/decorators/active-user.decorator'
+import { IUserActive } from 'src/common/interfaces/user-active.interface'
 interface MulterFileWithPath extends Express.Multer.File {
   path: string
 }
@@ -26,29 +38,53 @@ export class UsersController {
 
   @Auth(Role.USER)
   @Get(':id')
-  getUserProfile(@Param('id') id: string) {
+  getUserProfile(@Param('id') id: string, @ActiveUser() user: IUserActive) {
+    if (user.sub !== id) {
+      throw new ForbiddenException('You can only access your own profile')
+    }
     return this.usersService.getUserProfile(id)
   }
 
   @Auth(Role.USER)
   @Patch(':id')
-  updateUserProfile(@Param('id') id: string, @Body() userProfile: Partial<UserProfileDto>) {
+  updateUserProfile(
+    @Param('id') id: string,
+    @Body() userProfile: Partial<UserProfileDto>,
+    @ActiveUser() user: IUserActive,
+  ) {
+    if (user.sub !== id) {
+      throw new ForbiddenException('You can only update your own profile')
+    }
     return this.usersService.updateUserProfile(id, userProfile)
   }
 
   @Auth(Role.USER)
   @Patch(':id/image')
   @UseInterceptors(CloudinaryFileInterceptor())
-  updateUserImage(@Param('id') id: string, @UploadedFile() file: MulterFileWithPath) {
+  updateUserImage(
+    @Param('id') id: string,
+    @UploadedFile() file: MulterFileWithPath,
+    @ActiveUser() user: IUserActive,
+  ) {
+    if (user.sub !== id) {
+      throw new ForbiddenException('You can only update your own profile image')
+    }
     if (!file || !file.path) {
-      throw new Error('File or file path is missing')
+      throw new BadRequestException('File or file path is missing')
     }
     return this.usersService.updateImageUrl(id, file.path)
   }
 
   @Auth(Role.USER)
   @Patch(':id/delete-image')
-  async deleteUserImage(@Param('id') id: string, @Body('imageUrl') imageUrl: string) {
+  async deleteUserImage(
+    @Param('id') id: string,
+    @Body('imageUrl') imageUrl: string,
+    @ActiveUser() user: IUserActive,
+  ) {
+    if (user.sub !== id) {
+      throw new ForbiddenException('You can only delete your own profile image')
+    }
     return this.usersService.deleteUserImage(id, imageUrl)
   }
 }
