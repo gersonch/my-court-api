@@ -41,6 +41,7 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+.env.example
 
 # temp directory
 .temp
@@ -60,3 +61,5 @@ flujo-auth.md
 
 session-ses_2c0f.md
 docs
+
+SETUP.md
