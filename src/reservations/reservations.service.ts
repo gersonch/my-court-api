@@ -15,6 +15,10 @@ export class ReservationsService {
     @InjectModel('Complex') private readonly complexModel: Model<Complex>,
   ) {}
 
+  // ============================================================================
+  // @section APP - Endpoints para usuarios (role: USER)
+  // ============================================================================
+
   /**
    * Crea una reserva con manejo de race condition via unique index.
    *
@@ -53,7 +57,7 @@ export class ReservationsService {
       const reservation = await this.reservationModel.create({
         ...createReservationDto,
         userId: new Types.ObjectId(userId),
-        status: 'confirmed', // explícito - el índice aplica solo para confirmed
+        status: 'pending', // explícito - el índice aplica solo para confirmed
       })
       return reservation
     } catch (error: unknown) {
@@ -79,20 +83,6 @@ export class ReservationsService {
     }
   }
 
-  async getReservations(fieldId: string) {
-    const now = new Date()
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const endDate = new Date(startOfToday.getTime() + 7 * 24 * 60 * 60 * 1000) // +7 días
-    return await this.reservationModel
-      .find({
-        fieldId: new Types.ObjectId(fieldId),
-        status: 'confirmed',
-        startTime: { $gte: startOfToday, $lte: endDate },
-      })
-      .select('startTime duration')
-      .sort({ startTime: 1 })
-  }
-
   /**
    * Obtiene las reservas de una cancha con paginación
    */
@@ -104,7 +94,7 @@ export class ReservationsService {
 
     const query = {
       fieldId: new Types.ObjectId(fieldId),
-      status: 'confirmed',
+      status: { $in: ['confirmed', 'pending', 'canceled'] },
       startTime: { $gte: startOfToday, $lte: endDate },
     }
 
@@ -132,7 +122,7 @@ export class ReservationsService {
         $match: {
           userId: new Types.ObjectId(userId),
           startTime: { $gte: fromDate },
-          status: { $in: ['confirmed', 'canceled'] },
+          status: { $in: ['confirmed', 'canceled', 'pending'] },
         },
       },
       {
@@ -197,7 +187,7 @@ export class ReservationsService {
     const total = await this.reservationModel.countDocuments({
       userId: new Types.ObjectId(userId),
       startTime: { $gte: fromDate },
-      status: { $in: ['confirmed', 'canceled'] },
+      status: { $in: ['confirmed', 'canceled', 'pending'] },
     })
 
     // Usar aggregation para hacer $lookup en lugar de N+1 queries
@@ -206,7 +196,7 @@ export class ReservationsService {
         $match: {
           userId: new Types.ObjectId(userId),
           startTime: { $gte: fromDate },
-          status: { $in: ['confirmed', 'canceled'] },
+          status: { $in: ['confirmed', 'canceled', 'pending'] },
         },
       },
       {
@@ -345,5 +335,162 @@ export class ReservationsService {
     }
     reservation.status = 'canceled'
     return await reservation.save()
+  }
+
+  // ============================================================================
+  // @section DASHBOARD - Endpoints para owners de complejo (role: OWNER)
+  // ============================================================================
+
+  /**
+   * Cambia el status de una reserva (confirmed/canceled)
+   *
+   * @param reservationId - ID de la reserva
+   * @param fieldId - ID del field (para validar pertenencia)
+   * @param newStatus - Nuevo status ('confirmed' o 'canceled')
+   * @param ownerId - ID del usuario que quiere cambiar el status
+   */
+  async changeReservationStatus(
+    reservationId: string,
+    fieldId: string,
+    newStatus: 'confirmed' | 'canceled',
+    ownerId: string,
+  ) {
+    if (newStatus !== 'confirmed' && newStatus !== 'canceled') {
+      throw new BadRequestException('Invalid status. Must be "confirmed" or "canceled"')
+    }
+
+    // 1. Buscar la reserva
+    const reservation = await this.reservationModel.findById(reservationId)
+    if (!reservation) {
+      throw new BadRequestException('Reservation not found')
+    }
+
+    // 2. Verificar que la reserva pertenece al field indicado
+    if (reservation.fieldId.toString() !== fieldId) {
+      throw new BadRequestException('This reservation does not belong to the specified field')
+    }
+
+    // 3. Obtener el complejo desde la reserva y validar que el owner es el correcto
+    const complex = await this.complexModel.findById(reservation.complexId)
+    if (!complex) {
+      throw new BadRequestException('Complex not found')
+    }
+    if (complex.owner.toString() !== ownerId) {
+      throw new BadRequestException('You are not the owner of this complex')
+    }
+
+    // 4. Cambiar status
+    reservation.status = newStatus
+    return await reservation.save()
+  }
+
+  /**
+   * Obtiene las reservas del complejo (todas las canchas) para el dashboard
+   */
+  async getReservationsByComplexPaginated(
+    complexId: string,
+    ownerId: string,
+    page: number = 1,
+    limit: number = 10,
+  ) {
+    const skip = (page - 1) * limit
+
+    const complex = await this.complexModel.findById(complexId)
+    if (!complex) {
+      throw new BadRequestException('Complex not found')
+    }
+    if (complex.owner.toString() !== ownerId) {
+      throw new BadRequestException('You are not the owner of this complex')
+    }
+
+    const now = new Date()
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const endDate = new Date(startOfToday.getTime() + 7 * 24 * 60 * 60 * 1000)
+
+    const query = {
+      complexId: new Types.ObjectId(complexId),
+      status: { $in: ['confirmed', 'pending', 'canceled'] },
+      startTime: { $gte: startOfToday, $lte: endDate },
+    }
+
+    const [data, total] = await Promise.all([
+      this.reservationModel
+        .find(query)
+        .populate('fieldId', 'name')
+        .select('fieldId startTime duration status')
+        .sort({ startTime: 1 })
+        .skip(skip)
+        .limit(limit)
+        .exec(),
+      this.reservationModel.countDocuments(query),
+    ])
+
+    const formattedData = data.map((reservation) => {
+      const field = reservation.fieldId as unknown as { name: string } | null
+      return {
+        fieldName: field?.name || '',
+        startTime: reservation.startTime,
+        duration: reservation.duration,
+        status: reservation.status,
+      }
+    })
+
+    return createPaginatedResponse(formattedData, page, limit, total)
+  }
+
+  /**
+   * Obtiene las reservas de una cancha específica del complejo para el dashboard
+   */
+  async getReservationsByComplexAndFieldPaginated(
+    complexId: string,
+    fieldId: string,
+    ownerId: string,
+    page: number = 1,
+    limit: number = 10,
+  ) {
+    const skip = (page - 1) * limit
+
+    const complex = await this.complexModel.findById(complexId)
+    if (!complex) {
+      throw new BadRequestException('Complex not found')
+    }
+    if (complex.owner.toString() !== ownerId) {
+      throw new BadRequestException('You are not the owner of this complex')
+    }
+
+    const now = new Date()
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const endDate = new Date(startOfToday.getTime() + 7 * 24 * 60 * 60 * 1000)
+
+    const query = {
+      complexId: new Types.ObjectId(complexId),
+      fieldId: new Types.ObjectId(fieldId),
+      status: { $in: ['confirmed', 'pending', 'canceled'] },
+      startTime: { $gte: startOfToday, $lte: endDate },
+    }
+
+    const [data, total] = await Promise.all([
+      this.reservationModel
+        .find(query)
+        .populate('fieldId', 'name')
+        .select('fieldId startTime duration status')
+        .sort({ startTime: 1 })
+        .skip(skip)
+        .limit(limit)
+        .exec(),
+      this.reservationModel.countDocuments(query),
+    ])
+
+    const formattedData = data.map((reservation) => {
+      const field = reservation.fieldId as unknown as { name: string } | null
+      return {
+        fieldName: field?.name,
+        startTime: reservation.startTime,
+        duration: reservation.duration,
+        status: reservation.status,
+      }
+    })
+
+    return createPaginatedResponse(formattedData, page, limit, total)
   }
 }

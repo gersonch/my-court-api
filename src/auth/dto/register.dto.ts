@@ -15,7 +15,11 @@ export class RegisterDto {
   @IsEmail()
   email: string
 
-  @ApiProperty({ example: 'password123', description: 'Contraseña (mínimo 6 caracteres)', minLength: 6 })
+  @ApiProperty({
+    example: 'password123',
+    description: 'Contraseña (mínimo 6 caracteres)',
+    minLength: 6,
+  })
   @Transform(({ value }: { value: string }) => value.trim())
   @IsString()
   @MinLength(6)
@@ -51,7 +55,11 @@ export class RegisterDto {
   @IsOptional()
   address: string
 
-  @ApiProperty({ example: 'https://example.com/image.jpg', description: 'URL de imagen de perfil', required: false })
+  @ApiProperty({
+    example: 'https://example.com/image.jpg',
+    description: 'URL de imagen de perfil',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   image_url: string
