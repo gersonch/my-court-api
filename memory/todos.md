@@ -29,11 +29,90 @@
 - [x] **1.7** Add `ranking` array (americano final):
   - playerId, coupleName, wins, gamesPlayed
 
-### Validation
+### Validation ✅ COMPLETED
 
-- [ ] **1.8** Validate: americano ONLY for padel
-- [ ] **1.9** Validate: playoff teams must be 4, 8, or 16
+- [x] **1.8** Validate: americano ONLY for padel
+- [x] **1.9** Validate: playoff teams must be 4, 8, or 16
 - [x] **1.10** Update state enum: add `in_progress`, `cancelled`
+
+---
+
+## PHASE 1: COMPLETED ✅
+
+---
+
+## PHASE 4: Americans (Pareado - Solo Padel) ✅ IMPLEMENTED
+
+- [x] **4.1** Validate: ONLY padel allowed (in createTournament)
+- [x] **4.2** Rotating couples system (generateScheduleAmericano)
+- [x] **4.3** Generate match table (each couple vs each couple)
+- [x] **4.4** Score per couple (pointsA, pointsB)
+- [x] **4.5** Final ranking by points (getRankingAmericano)
+- [x] **4.6** Scheduling: by hour, uses available courts from complex
+- [x] AddPlayersDto: DTO for adding individual players
+- [x] addPlayers: method to add players to americano tournament
+- [x] generateScheduleAmericano: method to generate schedule
+- [x] getScheduleAmericano: method to get schedule
+- [x] getRankingAmericano: method to get ranking
+- [x] updateMatchAmericano: method to update match results
+- [x] Endpoints: addPlayers, generateSchedule, updateMatch, getSchedule, getRanking
+- [x] Tests: 24 tests passing
+
+---
+
+## PHASE 4.1: Subscription System
+
+### Schema ✅ DONE
+
+- [x] Add subscribers array to TournamentSchema
+  - userId: ObjectId
+  - status: 'pending' | 'approved' | 'rejected'
+  - subscribedAt: Date
+
+### DTOs ✅ DONE
+
+- [x] SubscribeDto: userId
+- [x] ApproveSubscriberDto: userId, action: 'approve' | 'reject'
+
+### Service ✅ DONE
+
+- [x] subscribe(): user subscribes to tournament
+- [x] getSubscribers(): get all subscribers (owner only)
+- [x] getMySubscriptionStatus(): get user's subscription status
+- [x] approveSubscriber(): owner approves user
+- [x] rejectSubscriber(): owner rejects user
+- [x] addApprovedUsers(): owner adds approved users to tournament
+
+### Controller ✅ DONE
+
+- [x] POST /:id/subscribe
+- [x] GET /:id/subscribers
+- [x] GET /:id/subscribe-status
+- [x] PATCH /:id/subscribers/:userId
+- [x] POST /:id/add-approved-users
+
+### Docs ✅ DONE
+
+- [x] docs/AMERICANO_API.md: Agregada sección de suscripciones
+
+---
+
+## Query Optimizations ✅ DONE
+
+- [x] getSubscribers(): N+1 → $in query (11 queries → 2)
+- [x] addPlayers(): N+1 → $in query (8 queries → 1)
+- [x] createTeams(): N+1 → $in query (8 queries → 1)
+- [x] addApprovedUsers(): N+1 → $in query (4 queries → 1)
+
+See memory/decisions.md for details.
+
+---
+
+## Tests ✅ DONE
+
+- [x] tournaments.dto.spec.ts: 11 tests
+- [x] tournaments.service.spec.ts: 24 tests → 35 tests (added subscription tests)
+- [x] Total: 46 tests passing
 
 ---
 

@@ -102,7 +102,7 @@ Rotating couples system where each pair plays against all other pairs.
 
 interface Tournament {
   // ... existing fields
-  tipoTorneo: 'liga' | 'playoff' | 'americano'
+  tournamentType: 'liga' | 'playoff' | 'americano'
 
   // Configuration based on type
   config: {
@@ -169,6 +169,13 @@ interface MatchEvent {
   playerId: string
   team: 'A' | 'B'
 }
+
+// Subscribers (users who want to participate)
+interface Subscriber {
+  userId: string
+  status: 'pending' | 'approved' | 'rejected'
+  subscribedAt: Date
+}
 ```
 
 ---
@@ -177,16 +184,26 @@ interface MatchEvent {
 
 ### Owner (create/manage)
 
-| Method | Endpoint                          | Description                         |
-| ------ | --------------------------------- | ----------------------------------- |
-| POST   | `/tournaments`                    | Create tournament (with tipoTorneo) |
-| PATCH  | `/tournaments/:id/config`         | Configure parameters                |
-| POST   | `/tournaments/:id/teams`          | Add teams                           |
-| POST   | `/tournaments/:id/generate`       | Generate fixture/brackets           |
-| PATCH  | `/tournaments/:id/match/:matchId` | Update result                       |
-| GET    | `/tournaments/:id/standings`      | View standings (liga)               |
-| GET    | `/tournaments/:id/brackets`       | View brackets (playoff)             |
-| GET    | `/tournaments/:id/ranking`        | View ranking (americano)            |
+| Method | Endpoint                               | Description                             |
+| ------ | -------------------------------------- | --------------------------------------- |
+| POST   | `/tournaments`                         | Create tournament (with tournamentType) |
+| PATCH  | `/tournaments/:id/config`              | Configure parameters                    |
+| POST   | `/tournaments/:id/teams`               | Add teams                               |
+| POST   | `/tournaments/:id/generate`            | Generate fixture/brackets               |
+| PATCH  | `/tournaments/:id/match/:matchId`      | Update result                           |
+| GET    | `/tournaments/:id/standings`           | View standings (liga)                   |
+| GET    | `/tournaments/:id/brackets`            | View brackets (playoff)                 |
+| GET    | `/tournaments/:id/ranking`             | View ranking (americano)                |
+| GET    | `/tournaments/:id/subscribers`         | View subscribers list                   |
+| PATCH  | `/tournaments/:id/subscribers/:userId` | Approve/reject subscriber               |
+| POST   | `/tournaments/:id/add-approved-users`  | Add approved users to tournament        |
+
+### User (subscribe)
+
+| Method | Endpoint                            | Description                |
+| ------ | ----------------------------------- | -------------------------- |
+| POST   | `/tournaments/:id/subscribe`        | User wants to participate  |
+| GET    | `/tournaments/:id/subscribe-status` | Get my subscription status |
 
 ### User (view results)
 

@@ -29,7 +29,7 @@ export class CreateTournamentDto {
   sport: 'futbol' | 'padel'
 
   @IsEnum(['liga', 'playoff', 'americano'])
-  tipoTorneo: 'liga' | 'playoff' | 'americano'
+  tournamentType: 'liga' | 'playoff' | 'americano'
 
   @ValidateNested()
   @Type(() => ConfigDto)

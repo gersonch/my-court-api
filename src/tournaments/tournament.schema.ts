@@ -4,7 +4,7 @@ export const TournamentSchema = new Schema(
   {
     name: String,
     sport: { type: String, enum: ['futbol', 'padel'], required: true },
-    tipoTorneo: {
+    tournamentType: {
       type: String,
       enum: ['liga', 'playoff', 'americano'],
       required: true,
@@ -120,8 +120,9 @@ export const TournamentSchema = new Schema(
         startTime: String,
         coupleA: [String], // [player1, player2]
         coupleB: [String],
-        scoreA: Number,
-        scoreB: Number,
+        pointsA: Number, // puntos de la pareja A
+        pointsB: Number, // puntos de la pareja B
+        isFinished: Boolean,
       },
     ],
 
@@ -129,9 +130,22 @@ export const TournamentSchema = new Schema(
     ranking: [
       {
         playerId: String,
-        coupleName: String,
-        wins: { type: Number, default: 0 },
+        playerName: String,
+        points: { type: Number, default: 0 },
         gamesPlayed: { type: Number, default: 0 },
+      },
+    ],
+
+    // Subscribers (usuarios que quieren participar)
+    subscribers: [
+      {
+        userId: { type: Types.ObjectId, ref: 'User' },
+        status: {
+          type: String,
+          enum: ['pending', 'approved', 'rejected'],
+          default: 'pending',
+        },
+        subscribedAt: { type: Date, default: Date.now },
       },
     ],
   },

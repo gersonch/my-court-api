@@ -29,7 +29,7 @@ For each decision:
 
 **Decision**: Extend the Tournament schema to include:
 
-- `tipoTorneo`: 'liga' | 'playoff' | 'americano' (required field)
+- `tournamentType`: 'liga' | 'playoff' | 'americano' (required field)
 - `config`: Configuration object for tournament parameters
 - Enhanced `matches` array with numeric scores, status, timing
 - `standings`: For Liga mode (points table)
@@ -49,6 +49,35 @@ For each decision:
 
 - Separate collections: Separate TournamentLiga, TournamentPlayoff collections - Rejected because most fields are shared, would duplicate logic
 - Polymorphic approach with discriminator: Using Mongoose discriminator - More complex, overkill for just 3 types
+
+---
+
+## 2026-04-21 - Query Optimization (N+1 Problem)
+
+**Context**: Several methods were making N+1 queries to the database - 1 query to get tournament + N queries for each user. For 4 users this meant 5 queries, for 10 subscribers meant 11 queries.
+
+**Decision**: Replace individual `findById()` calls with bulk `find({ _id: { $in: [...] } })` queries.
+
+**Methods optimized**:
+
+- `getSubscribers()`: 11 queries → 2 queries
+- `addPlayers()`: 8 queries → 1 query
+- `createTeams()`: 8 queries → 1 query
+- `addApprovedUsers()`: 4 queries → 1 query
+
+**Status**: ✅ IMPLEMENTED
+
+**Implementation**:
+
+```typescript
+// Antes (N+1 queries):
+const user = await this.userModel.findById(player.userId)
+
+// Después (1 query):
+const userIds = players.map((p) => p.userId)
+const users = await this.userModel.find({ _id: { $in: userIds } }).lean()
+const usersMap = new Map(users.map((u) => [u._id.toString(), u]))
+```
 
 ---
 

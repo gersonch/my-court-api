@@ -10,7 +10,7 @@ describe('Tournament DTOs', () => {
       const dto = plainToInstance(CreateTournamentDto, {
         name: 'Torneo de Prueba',
         sport: 'futbol',
-        tipoTorneo: 'liga',
+        tournamentType: 'liga',
         config: {
           teamsCount: 8,
         },
@@ -24,7 +24,7 @@ describe('Tournament DTOs', () => {
       const dto = plainToInstance(CreateTournamentDto, {
         name: 'Torneo Playoff',
         sport: 'futbol',
-        tipoTorneo: 'playoff',
+        tournamentType: 'playoff',
         config: {
           teamsCount: 8,
           playoffsRounds: 3,
@@ -39,7 +39,7 @@ describe('Tournament DTOs', () => {
       const dto = plainToInstance(CreateTournamentDto, {
         name: 'Torneo Americano',
         sport: 'padel',
-        tipoTorneo: 'americano',
+        tournamentType: 'americano',
         config: {
           teamsCount: 4,
           rounds: 3,
@@ -55,7 +55,7 @@ describe('Tournament DTOs', () => {
       const dto = plainToInstance(CreateTournamentDto, {
         name: 'Torneo Americano',
         sport: 'futbol',
-        tipoTorneo: 'americano',
+        tournamentType: 'americano',
         config: {
           teamsCount: 4,
           rounds: 3,
@@ -68,11 +68,11 @@ describe('Tournament DTOs', () => {
       expect(errors.length).toBe(0) // DTO is valid, service must reject
     })
 
-    it('should reject invalid tipoTorneo', async () => {
+    it('should reject invalid tournamentType', async () => {
       const dto = plainToInstance(CreateTournamentDto, {
         name: 'Torneo Invalid',
         sport: 'futbol',
-        tipoTorneo: 'invalid' as any,
+        tournamentType: 'invalid' as any,
         config: {
           teamsCount: 8,
         },
@@ -86,7 +86,7 @@ describe('Tournament DTOs', () => {
       const dto = plainToInstance(CreateTournamentDto, {
         name: 'Torneo Playoff',
         sport: 'futbol',
-        tipoTorneo: 'playoff',
+        tournamentType: 'playoff',
         config: {
           teamsCount: 6, // Invalid: must be 4, 8, or 16
         },
