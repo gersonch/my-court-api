@@ -17,10 +17,11 @@ export class TournamentsService {
   ) {}
 
   getTournamentsByComplexId = async (complexId: string): Promise<ITournament[]> => {
-    // only name, id, and status = open of tournaments
+    // only name, id, and status = open of tournaments - max 10 tournaments per complex
     const tournaments = await this.tournamentModel.find(
-      { complexId, state: 'open' },
+      { complexId },
       { name: 1, _id: 1, state: 1 },
+      { limit: 10 },
     )
     return tournaments
   }
