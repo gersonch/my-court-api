@@ -1,4 +1,3 @@
-// eslint-disable-next-line prettier/prettier
 import { Body, Controller, Get, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { RegisterDto } from './dto/register.dto'
@@ -35,7 +34,34 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Login exitoso' })
   @ApiResponse({ status: 401, description: 'Credenciales inválidas' })
   async login(@Body() logindto: LoginDto, @Res({ passthrough: true }) res: Response) {
-    const result = await this.authService.login(logindto)
+    const result = await this.authService.loginUser(logindto)
+
+    res.cookie('token', result.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000,
+    })
+
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
+
+    return result
+  }
+
+  @Post('login/owner')
+  @ApiOperation({
+    summary: 'Iniciar sesión como propietario',
+    description: 'Autentica al propietario y retorna tokens en cookies',
+  })
+  @ApiResponse({ status: 200, description: 'Login exitoso' })
+  @ApiResponse({ status: 401, description: 'Credenciales inválidas o no es propietario' })
+  async loginOwner(@Body() logindto: LoginDto, @Res({ passthrough: true }) res: Response) {
+    const result = await this.authService.loginOwner(logindto)
 
     res.cookie('token', result.token, {
       httpOnly: true,

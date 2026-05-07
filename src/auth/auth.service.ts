@@ -84,15 +84,15 @@ export class AuthService {
       await this.usersService.create(data)
       return { name: registerDto.name, email: registerDto.email }
     } catch (error: unknown) {
-      // eslint-disable-next-line prettier/prettier
       const message = error instanceof Error ? error.message : typeof error === 'string' ? error : 'Unknown error'
       throw new InternalServerErrorException('Error registering user', message)
     }
   }
 
-  async login({ email, password }: LoginDto) {
+  private async login({ email, password }: LoginDto) {
     try {
       const user = await this.usersService.findOne(email)
+
       if (user && user.provider && user.provider !== 'local') {
         throw new BadRequestException(
           `Este usuario ya existe con el proveedor ${user.provider}. Inicia sesión con ${user.provider}.`,
@@ -127,6 +127,22 @@ export class AuthService {
     } catch {
       throw new InternalServerErrorException('Error logging in')
     }
+  }
+
+  async loginUser({ email, password }: LoginDto) {
+    const result = await this.login({ email, password })
+    if (result.user.role !== 'user') {
+      throw new UnauthorizedException('Only users can log in here')
+    }
+    return result
+  }
+
+  async loginOwner({ email, password }: LoginDto) {
+    const result = await this.login({ email, password })
+    if (result.user.role !== 'owner') {
+      throw new UnauthorizedException('Only owners can log in here')
+    }
+    return result
   }
 
   async validateGoogleUser(googleUser: { email: string; firstName: string }) {
