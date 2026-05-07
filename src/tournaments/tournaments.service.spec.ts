@@ -150,9 +150,7 @@ describe('TournamentsService - Americano', () => {
         ranking: [],
       })
 
-      await expect(service.generateScheduleAmericano('tournament-123')).rejects.toThrow(
-        'No players registered',
-      )
+      await expect(service.generateScheduleAmericano('tournament-123')).rejects.toThrow('No players registered')
     })
 
     it('should generate schedule with players', async () => {
@@ -224,9 +222,9 @@ describe('TournamentsService - Americano', () => {
         tournamentType: 'liga',
       })
 
-      await expect(
-        service.updateMatchAmericano('tournament-123', 0, { pointsA: 16 }),
-      ).rejects.toThrow('This method is only for americano tournaments')
+      await expect(service.updateMatchAmericano('tournament-123', 0, { pointsA: 16 })).rejects.toThrow(
+        'This method is only for americano tournaments',
+      )
     })
 
     it('should reject invalid match index', async () => {
@@ -235,9 +233,9 @@ describe('TournamentsService - Americano', () => {
         schedule: [{ round: 1 }],
       })
 
-      await expect(
-        service.updateMatchAmericano('tournament-123', 999, { pointsA: 16 }),
-      ).rejects.toThrow('Match not found')
+      await expect(service.updateMatchAmericano('tournament-123', 999, { pointsA: 16 })).rejects.toThrow(
+        'Match not found',
+      )
     })
   })
 
@@ -273,9 +271,7 @@ describe('TournamentsService - Americano', () => {
         subscribers: [{ userId: 'user-1', status: 'pending' }],
       })
 
-      await expect(service.subscribe('tournament-123', 'user-1')).rejects.toThrow(
-        'You are already subscribed',
-      )
+      await expect(service.subscribe('tournament-123', 'user-1')).rejects.toThrow('You are already subscribed')
     })
   })
 
@@ -340,12 +336,7 @@ describe('TournamentsService - Americano', () => {
         subscribers: [{ userId: 'user-1', status: 'pending' }],
       })
 
-      const result = await service.approveSubscriber(
-        'tournament-123',
-        'owner-1',
-        'user-1',
-        'approve',
-      )
+      const result = await service.approveSubscriber('tournament-123', 'owner-1', 'user-1', 'approve')
 
       expect(result.status).toBe('approved')
     })
@@ -358,9 +349,9 @@ describe('TournamentsService - Americano', () => {
         subscribers: [],
       })
 
-      await expect(
-        service.approveSubscriber('tournament-123', 'owner-1', 'user-1', 'approve'),
-      ).rejects.toThrow('Subscriber not found')
+      await expect(service.approveSubscriber('tournament-123', 'owner-1', 'user-1', 'approve')).rejects.toThrow(
+        'Subscriber not found',
+      )
     })
   })
 

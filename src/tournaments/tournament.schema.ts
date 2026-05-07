@@ -12,13 +12,7 @@ export const TournamentSchema = new Schema(
     complexId: { type: Types.ObjectId, ref: 'Complex' },
     category: {
       type: String,
-      enum: [
-        'Primera división',
-        'Segunda división',
-        'Tercera división',
-        'Cuarta división',
-        'Quinta división',
-      ],
+      enum: ['Primera división', 'Segunda división', 'Tercera división', 'Cuarta división', 'Quinta división'],
     },
     startDate: Date,
     endDate: Date,

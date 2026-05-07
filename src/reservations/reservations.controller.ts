@@ -21,18 +21,11 @@ export class ReservationsController {
 
   @Auth(Role.USER)
   @Get('user')
-  getReservationsByUser(
-    @ActiveUser() userId: IUserActive,
-    @Query() pagination: PaginationQueryDto,
-  ) {
+  getReservationsByUser(@ActiveUser() userId: IUserActive, @Query() pagination: PaginationQueryDto) {
     if (!Types.ObjectId.isValid(userId.sub)) {
       throw new BadRequestException('Invalid userId format')
     }
-    return this.reservationsService.getReservationsByUserPaginated(
-      userId.sub,
-      pagination.page,
-      pagination.limit,
-    )
+    return this.reservationsService.getReservationsByUserPaginated(userId.sub, pagination.page, pagination.limit)
   }
 
   @Get(':fieldId')
@@ -40,11 +33,7 @@ export class ReservationsController {
     if (!Types.ObjectId.isValid(fieldId)) {
       throw new BadRequestException('Invalid fieldId format')
     }
-    return this.reservationsService.getReservationsPaginated(
-      fieldId,
-      pagination.page,
-      pagination.limit,
-    )
+    return this.reservationsService.getReservationsPaginated(fieldId, pagination.page, pagination.limit)
   }
 
   @Auth(Role.USER)
@@ -58,10 +47,7 @@ export class ReservationsController {
 
   @Auth(Role.USER)
   @Patch(':reservationId/cancel')
-  cancelReservation(
-    @Param('reservationId') reservationId: string,
-    @ActiveUser() user: IUserActive,
-  ) {
+  cancelReservation(@Param('reservationId') reservationId: string, @ActiveUser() user: IUserActive) {
     if (!Types.ObjectId.isValid(reservationId)) {
       throw new BadRequestException('Invalid reservationId format')
     }

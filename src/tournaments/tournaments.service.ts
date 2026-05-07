@@ -18,10 +18,7 @@ export class TournamentsService {
 
   getTournamentsByComplexId = async (complexId: string): Promise<ITournament[]> => {
     // only name, id, and status = open of tournaments
-    const tournaments = await this.tournamentModel.find(
-      { complexId, state: 'open' },
-      { name: 1, _id: 1, state: 1 },
-    )
+    const tournaments = await this.tournamentModel.find({ complexId }, { name: 1, _id: 1, state: 1 })
     return tournaments
   }
 
@@ -52,10 +49,7 @@ export class TournamentsService {
   }
 
   // -- createTournament -- //
-  async createTournament(
-    tournamentData: CreateTournamentDto,
-    userId: string,
-  ): Promise<ITournament> {
+  async createTournament(tournamentData: CreateTournamentDto, userId: string): Promise<ITournament> {
     const { name, sport, tournamentType, config } = tournamentData
     if (!name || !sport) {
       throw new BadRequestException('Tournament name and sport are required')
@@ -170,9 +164,7 @@ export class TournamentsService {
 
     // Handle Americano: players are individual, not teams
     if (tournamentType === 'americano') {
-      throw new BadRequestException(
-        'For americano tournaments, use /tournaments/:id/add-players endpoint',
-      )
+      throw new BadRequestException('For americano tournaments, use /tournaments/:id/add-players endpoint')
     }
 
     // Handle Liga/Playoff: teams with players
@@ -253,9 +245,7 @@ export class TournamentsService {
 
     if (tournamentType === 'liga' && config?.teamsCount) {
       if (processedTeams.length > config.teamsCount) {
-        throw new BadRequestException(
-          `Liga maximum is ${config.teamsCount} teams. Provided: ${processedTeams.length}`,
-        )
+        throw new BadRequestException(`Liga maximum is ${config.teamsCount} teams. Provided: ${processedTeams.length}`)
       }
     }
 
@@ -265,10 +255,7 @@ export class TournamentsService {
   }
 
   // -- addPlayers (AMERICANO) -- //
-  async addPlayers(
-    tournamentId: string,
-    playersData: { players: Array<{ userId: string; position?: string }> },
-  ) {
+  async addPlayers(tournamentId: string, playersData: { players: Array<{ userId: string; position?: string }> }) {
     const tournament = await this.getTournamentById(tournamentId)
 
     if (tournament.tournamentType !== 'americano') {
@@ -290,9 +277,7 @@ export class TournamentsService {
     // Validate: max players
     const validCounts = [4, 6, 8]
     if (!validCounts.includes(players.length)) {
-      throw new BadRequestException(
-        `Americano requires 4, 6, or 8 players. Provided: ${players.length}`,
-      )
+      throw new BadRequestException(`Americano requires 4, 6, or 8 players. Provided: ${players.length}`)
     }
 
     // Validate all users exist - OPTIMIZATION: single query with $in
@@ -639,9 +624,7 @@ export class TournamentsService {
       // Validate: max allowed
       const validCounts = [4, 6, 8]
       if (!validCounts.includes(approved.length)) {
-        throw new BadRequestException(
-          `Can only add 4, 6, or 8 approved users. Current: ${approved.length}`,
-        )
+        throw new BadRequestException(`Can only add 4, 6, or 8 approved users. Current: ${approved.length}`)
       }
 
       // OPTIMIZATION: Single query with $in instead of N queries

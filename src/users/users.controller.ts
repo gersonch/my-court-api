@@ -61,11 +61,7 @@ export class UsersController {
   @Auth(Role.USER)
   @Patch(':id/image')
   @UseInterceptors(CloudinaryFileInterceptor())
-  updateUserImage(
-    @Param('id') id: string,
-    @UploadedFile() file: MulterFileWithPath,
-    @ActiveUser() user: IUserActive,
-  ) {
+  updateUserImage(@Param('id') id: string, @UploadedFile() file: MulterFileWithPath, @ActiveUser() user: IUserActive) {
     if (user.sub !== id) {
       throw new ForbiddenException('You can only update your own profile image')
     }
@@ -77,11 +73,7 @@ export class UsersController {
 
   @Auth(Role.USER)
   @Patch(':id/delete-image')
-  async deleteUserImage(
-    @Param('id') id: string,
-    @Body('imageUrl') imageUrl: string,
-    @ActiveUser() user: IUserActive,
-  ) {
+  async deleteUserImage(@Param('id') id: string, @Body('imageUrl') imageUrl: string, @ActiveUser() user: IUserActive) {
     if (user.sub !== id) {
       throw new ForbiddenException('You can only delete your own profile image')
     }

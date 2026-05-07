@@ -66,15 +66,8 @@ export class ReservationsService {
       // @description El unique index previno la creación duplicada
       // @action user-friendly message
       // -----------------------------------------------------------------------------
-      if (
-        error &&
-        typeof error === 'object' &&
-        'code' in error &&
-        (error as Record<string, unknown>).code === 11000
-      ) {
-        throw new BadRequestException(
-          'This time slot has already been reserved. Please choose another time.',
-        )
+      if (error && typeof error === 'object' && 'code' in error && (error as Record<string, unknown>).code === 11000) {
+        throw new BadRequestException('This time slot has already been reserved. Please choose another time.')
       }
 
       // Re-lanzar otros errores como InternalServerError
@@ -387,12 +380,7 @@ export class ReservationsService {
   /**
    * Obtiene las reservas del complejo (todas las canchas) para el dashboard
    */
-  async getReservationsByComplexPaginated(
-    complexId: string,
-    ownerId: string,
-    page: number = 1,
-    limit: number = 10,
-  ) {
+  async getReservationsByComplexPaginated(complexId: string, ownerId: string, page: number = 1, limit: number = 10) {
     const skip = (page - 1) * limit
 
     const complex = await this.complexModel.findById(complexId)

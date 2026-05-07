@@ -83,11 +83,7 @@ export class TournamentsController {
   @Auth(Role.OWNER)
   @Patch('match/:id')
   updateMatch(@Param('id') tournamentId: string, @Body() matchData: UpdateMatchAmericanoDto) {
-    return this.tournamentsService.updateMatchAmericano(
-      tournamentId,
-      matchData.matchIndex,
-      matchData,
-    )
+    return this.tournamentsService.updateMatchAmericano(tournamentId, matchData.matchIndex, matchData)
   }
 
   @Auth(Role.USER)
@@ -106,11 +102,7 @@ export class TournamentsController {
 
   @Auth(Role.USER)
   @Post('subscribe/:id')
-  subscribe(
-    @Param('id') tournamentId: string,
-    @Body() subscribeData: SubscribeDto,
-    @ActiveUser() user: IUserActive,
-  ) {
+  subscribe(@Param('id') tournamentId: string, @Body() subscribeData: SubscribeDto, @ActiveUser() user: IUserActive) {
     return this.tournamentsService.subscribe(tournamentId, subscribeData.userId || user.sub)
   }
 
@@ -134,12 +126,7 @@ export class TournamentsController {
     @Body() actionData: ApproveSubscriberDto,
     @ActiveUser() user: IUserActive,
   ) {
-    return this.tournamentsService.approveSubscriber(
-      tournamentId,
-      user.sub,
-      targetUserId,
-      actionData.action,
-    )
+    return this.tournamentsService.approveSubscriber(tournamentId, user.sub, targetUserId, actionData.action)
   }
 
   @Auth(Role.OWNER)
