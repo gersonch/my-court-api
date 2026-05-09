@@ -81,4 +81,10 @@ export class ComplexesController {
   findById(@Param('complexId') complexId: string, @ActiveUser() user: IUserActive) {
     return this.complexService.findById(complexId, user.sub)
   }
+
+  @Auth(Role.OWNER)
+  @Get('complex/:ownerId')
+  getComplexByOwnerId(@Param('ownerId') ownerId: string) {
+    return this.complexService.getComplexByOwnerId(ownerId)
+  }
 }

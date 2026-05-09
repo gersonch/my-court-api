@@ -1,4 +1,4 @@
-export interface Complex extends Document {
+export interface Complex {
   name: string
   description: string
   createdAt?: Date

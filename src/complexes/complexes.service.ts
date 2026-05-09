@@ -18,12 +18,12 @@ export class ComplexesService {
     @InjectModel('Rating') private ratingModel: Model<Rating>,
   ) {}
 
-  async getComplexIdByOwner(userId: string): Promise<string | null> {
-    const complex = await this.complexModel.findOne({ owner: userId })
+  async getComplexByOwnerId(ownerId: string): Promise<any> {
+    const complex = await this.complexModel.findOne({ owner: ownerId })
     if (!complex) {
       throw new BadRequestException('Complex not found for the given owner')
     }
-    return complex._id.toString() // Convertimos a string para mayor compatibilidad
+    return complex
   }
 
   async userHasRoleOwner(userId: string) {

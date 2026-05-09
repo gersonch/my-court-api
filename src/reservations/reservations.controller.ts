@@ -1,4 +1,3 @@
-// eslint-disable-next-line prettier/prettier
 import { Body, Controller, Get, Param, Post, Query, BadRequestException, Patch } from '@nestjs/common'
 import { ReservationsService } from './reservations.service'
 import { CreateReservationDto } from './dto/create-reservation.dto'
