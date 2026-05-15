@@ -53,4 +53,13 @@ export class ReservationsController {
 
     return this.reservationsService.cancelReservation(reservationId, user.sub)
   }
+
+  @Auth(Role.OWNER)
+  @Get(':reservationId')
+  getReservationById(@Param('reservationId') reservationId: string) {
+    if (!Types.ObjectId.isValid(reservationId)) {
+      throw new BadRequestException('Invalid reservationId format')
+    }
+    return this.reservationsService.getReservationById(reservationId)
+  }
 }

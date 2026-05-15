@@ -481,4 +481,12 @@ export class ReservationsService {
 
     return createPaginatedResponse(formattedData, page, limit, total)
   }
+
+  async getReservationById(reservationId: string) {
+    const reservation = await this.reservationModel.findById(reservationId)
+    if (!reservation) {
+      throw new BadRequestException('Reservation not found')
+    }
+    return reservation
+  }
 }
