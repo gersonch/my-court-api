@@ -62,4 +62,10 @@ export class ReservationsController {
     }
     return this.reservationsService.getReservationById(reservationId)
   }
+
+  @Auth(Role.OWNER)
+  @Get(':fieldId')
+  getReservationByFieldId(@Param('fieldId') fieldId: string) {
+    return this.reservationsService.getReservationByFieldId(fieldId)
+  }
 }

@@ -489,4 +489,11 @@ export class ReservationsService {
     }
     return reservation
   }
+
+  async getReservationByFieldId(fieldId: any) {
+    const reservation = await this.reservationModel.find(fieldId)
+    if (!reservation) {
+      throw new BadRequestException('Reservation not found')
+    }
+  }
 }
