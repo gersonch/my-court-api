@@ -31,6 +31,7 @@ npm install @nestjs/swagger @scalar/nestjs-api-reference
 ```
 
 **Paquetes instalados:**
+
 - `@nestjs/swagger`: Genera el documento OpenAPI desde los controllers y DTOs
 - `@scalar/nestjs-api-reference`: Renderiza la documentación con una UI moderna
 
@@ -128,7 +129,6 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 @ApiTags('Autenticación') // SWAGGER: Agrupar endpoints
 @Controller('auth')
 export class AuthController {
-  
   @Post('register')
   @ApiOperation({ summary: 'Registrar nuevo usuario', description: 'Crea un nuevo usuario en el sistema' })
   @ApiResponse({ status: 201, description: 'Usuario creado exitosamente' })
@@ -143,41 +143,42 @@ export class AuthController {
 
 ### 5. Endpoints Disponibles
 
-| Endpoint | Descripción |
-|----------|-------------|
-| `/api-docs` | **Scalar API Reference** (documentación interactiva) |
-| `/api` | Swagger UI tradicional (opcional, deshabilitado por defecto) |
+| Endpoint    | Descripción                                                  |
+| ----------- | ------------------------------------------------------------ |
+| `/api-docs` | **Scalar API Reference** (documentación interactiva)         |
+| `/api`      | Swagger UI tradicional (opcional, deshabilitado por defecto) |
 
 ---
 
 ## Comparación: Swagger UI vs Scalar
 
-| Característica | Swagger UI | Scalar |
-|----------------|------------|--------|
-| UI | Funcional, clásica | Moderna, limpia |
-| Rendimiento | ~1.8s carga | ~900ms carga |
-| Tamaño bundle | Mayor | Menor |
-| Theming | Limitado | Múltiples temas |
-| Personalización | Básica | Avanzada |
-| Precio | Gratuito | Freemium |
+| Característica  | Swagger UI         | Scalar          |
+| --------------- | ------------------ | --------------- |
+| UI              | Funcional, clásica | Moderna, limpia |
+| Rendimiento     | ~1.8s carga        | ~900ms carga    |
+| Tamaño bundle   | Mayor              | Menor           |
+| Theming         | Limitado           | Múltiples temas |
+| Personalización | Básica             | Avanzada        |
+| Precio          | Gratuito           | Freemium        |
 
 ---
 
 ## Archivos Modificados
 
-| Archivo | Cambio |
-|---------|--------|
-| `package.json` | Agregadas dependencias |
-| `src/main.ts` | Configuración Swagger + Scalar |
-| `src/auth/dto/register.dto.ts` | Agregados `@ApiProperty()` |
-| `src/auth/dto/login.dto.ts` | Agregados `@ApiProperty()` |
-| `src/auth/auth.controller.ts` | Agregados `@ApiTags()`, `@ApiOperation()` |
+| Archivo                        | Cambio                                    |
+| ------------------------------ | ----------------------------------------- |
+| `package.json`                 | Agregadas dependencias                    |
+| `src/main.ts`                  | Configuración Swagger + Scalar            |
+| `src/auth/dto/register.dto.ts` | Agregados `@ApiProperty()`                |
+| `src/auth/dto/login.dto.ts`    | Agregados `@ApiProperty()`                |
+| `src/auth/auth.controller.ts`  | Agregados `@ApiTags()`, `@ApiOperation()` |
 
 ---
 
 ## Pruebas
 
 1. Iniciar el servidor:
+
    ```bash
    npm run start:dev
    ```
