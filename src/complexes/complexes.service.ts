@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { createComplexesDto, updateComplexDto } from './dto/create-complexes.dto'
@@ -18,10 +24,13 @@ export class ComplexesService {
     @InjectModel('Rating') private ratingModel: Model<Rating>,
   ) {}
 
-  async getComplexByOwnerId(ownerId: string): Promise<any> {
+  async getComplexByOwnerId(ownerId: string, userId: string): Promise<any> {
+    if (ownerId !== userId) {
+      throw new ForbiddenException('You are not the owner of this complex')
+    }
     const complex = await this.complexModel.findOne({ owner: ownerId })
     if (!complex) {
-      throw new BadRequestException('Complex not found for the given owner')
+      throw new NotFoundException('Complex not found for the given owner')
     }
     return complex
   }

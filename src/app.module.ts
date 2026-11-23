@@ -8,6 +8,7 @@ import { FieldsModule } from './fields/fields.module'
 import { RatingModule } from './rating/rating.module'
 import { TournamentsModule } from './tournaments/tournaments.module'
 import { ReservationsModule } from './reservations/reservations.module'
+import { RankingPointsModule } from './ranking-points/ranking-points.module'
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import { APP_GUARD } from '@nestjs/core'
 import * as Joi from 'joi'
@@ -52,6 +53,7 @@ import * as Joi from 'joi'
     RatingModule,
     TournamentsModule,
     ReservationsModule,
+    RankingPointsModule,
   ],
   providers: [
     {

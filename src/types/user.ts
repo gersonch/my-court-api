@@ -12,6 +12,8 @@ export interface User extends Document {
   dni?: string
   createdAt?: Date
   updatedAt?: Date
+  rankingPoints?: number
+  rankingUpdatedAt?: Date
 }
 
 // Interface para objetos returned por .lean() - sin metodos de Mongoose
