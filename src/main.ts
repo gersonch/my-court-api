@@ -22,8 +22,9 @@ async function bootstrap() {
     }),
   )
   app.use(cookieParser())
+  const origins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173').split(',').map((origin) => origin.trim())
 
-  app.enableCors({ origin: process.env.CORS_ORIGIN, credentials: true })
+  app.enableCors({ origin: origins, credentials: true })
 
   // ============================================================
   // SWAGGER: Configuración del documento OpenAPI
