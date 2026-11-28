@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { getModelToken } from '@nestjs/mongoose'
 import { TournamentsService } from './tournaments.service'
 
-describe('TournamentsService - Americano', () => {
+describe('TournamentsService', () => {
   let service: TournamentsService
   let mockTournamentModel: any
   let mockUserModel: any
@@ -13,6 +13,8 @@ describe('TournamentsService - Americano', () => {
       findById: jest.fn(),
       findByIdAndUpdate: jest.fn(),
       findOne: jest.fn(),
+      findOneAndUpdate: jest.fn(),
+      exists: jest.fn(),
     }
 
     mockUserModel = {
@@ -46,6 +48,50 @@ describe('TournamentsService - Americano', () => {
     }).compile()
 
     service = module.get<TournamentsService>(TournamentsService)
+  })
+
+  describe('updateAndOpenTournament', () => {
+    const dates = {
+      startDate: new Date('2026-12-01'),
+      endDate: new Date('2026-12-02'),
+      category: 'Primera división',
+    }
+
+    beforeEach(() => {
+      mockComplexModel.findOne.mockResolvedValue({ _id: 'complex-123' })
+    })
+
+    it('opens the selected inactive tournament when another tournament in the complex is open', async () => {
+      mockTournamentModel.findOne.mockResolvedValue({ _id: 'other-tournament', state: 'open' })
+      const opened = { _id: 'selected-tournament', state: 'open', ...dates }
+      mockTournamentModel.findOneAndUpdate.mockResolvedValue(opened)
+
+      await expect(service.updateAndOpenTournament('selected-tournament', 'owner-1', dates)).resolves.toEqual(opened)
+      expect(mockTournamentModel.findOneAndUpdate).toHaveBeenCalledWith(
+        { _id: 'selected-tournament', complexId: 'complex-123', state: 'inactive' },
+        { ...dates, state: 'open' },
+        { new: true, runValidators: true },
+      )
+    })
+
+    it('rejects a tournament that is no longer inactive', async () => {
+      mockTournamentModel.findOneAndUpdate.mockResolvedValue(null)
+      mockTournamentModel.exists.mockResolvedValue({ _id: 'selected-tournament' })
+
+      await expect(service.updateAndOpenTournament('selected-tournament', 'owner-1', dates)).rejects.toThrow(
+        'Tournament must be inactive to update and open',
+      )
+    })
+
+    it('rejects a tournament outside the owner’s complex', async () => {
+      mockTournamentModel.findOneAndUpdate.mockResolvedValue(null)
+      mockTournamentModel.exists.mockResolvedValue(null)
+
+      await expect(service.updateAndOpenTournament('external-tournament', 'owner-1', dates)).rejects.toThrow(
+        'Tournament not found for this complex',
+      )
+      expect(mockTournamentModel.exists).toHaveBeenCalledWith({ _id: 'external-tournament', complexId: 'complex-123' })
+    })
   })
 
   describe('addPlayers', () => {

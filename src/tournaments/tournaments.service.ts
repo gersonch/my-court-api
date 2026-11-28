@@ -129,29 +129,22 @@ export class TournamentsService {
     tournamentId: string,
     userId: string,
     data: UpdateTournamentAndOpenDto,
-  ): Promise<UpdateTournamentAndOpenDto> {
+  ): Promise<ITournament> {
     const complex = await this.getComplexByOwner(userId)
-    const tournament = await this.tournamentModel.findOne({ complexId: complex._id })
-
-    if (!tournament) {
-      throw new BadRequestException('Tournament not found for this complex')
-    }
-
-    if (tournament.state !== 'inactive') {
-      throw new BadRequestException('Tournament must be inactive to update and open')
-    }
-
-    const updatedTournament = await this.tournamentModel.findOneAndUpdate(
-      { _id: tournamentId, complexId: complex._id },
-      {
-        ...data,
-        state: 'open', // Ensure the state is set to 'open'
-      },
+    const filter = { _id: tournamentId, complexId: complex._id }
+    const tournament = await this.tournamentModel.findOneAndUpdate(
+      { ...filter, state: 'inactive' },
+      { ...data, state: 'open' },
       { new: true, runValidators: true },
     )
 
-    // Assuming UpdateTournamentAndOpenDto matches the tournament document structure
-    return updatedTournament as unknown as UpdateTournamentAndOpenDto
+    if (tournament) return tournament
+
+    if (!(await this.tournamentModel.exists(filter))) {
+      throw new BadRequestException('Tournament not found for this complex')
+    }
+
+    throw new BadRequestException('Tournament must be inactive to update and open')
   }
 
   async createTeams(tournamentId: string, sport: string, teamsDto: TeamsDto) {
