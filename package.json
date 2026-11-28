@@ -40,6 +40,7 @@
     "cookie-parser": "^1.4.7",
     "dayjs": "^1.11.13",
     "dotenv": "^17.4.2",
+    "joi": "^18.2.9",
     "mongoose": "^8.15.1",
     "multer": "^2.0.1",
     "passport": "^0.7.0",

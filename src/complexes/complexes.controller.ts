@@ -84,7 +84,7 @@ export class ComplexesController {
 
   @Auth(Role.OWNER)
   @Get('complex/:ownerId')
-  getComplexByOwnerId(@Param('ownerId') ownerId: string) {
-    return this.complexService.getComplexByOwnerId(ownerId)
+  getComplexByOwnerId(@Param('ownerId') ownerId: string, @ActiveUser() user: IUserActive) {
+    return this.complexService.getComplexByOwnerId(ownerId, user.sub)
   }
 }

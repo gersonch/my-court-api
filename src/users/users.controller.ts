@@ -11,7 +11,6 @@ import {
   BadRequestException,
 } from '@nestjs/common'
 import { UsersService } from './users.service'
-import { CreateUserDto } from './dto/create-user.dto'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { Role } from 'src/common/guards/enums/rol.enum'
 import { UserProfileDto } from './dto/user-profile.dto'
@@ -25,11 +24,6 @@ interface MulterFileWithPath extends Express.Multer.File {
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto)
-  }
 
   @Get()
   findAll() {

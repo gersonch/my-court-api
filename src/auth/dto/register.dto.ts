@@ -9,11 +9,11 @@ export class RegisterDto {
   @Transform(({ value }: { value: string }) => value.trim())
   @IsString()
   @MinLength(2)
-  name: string
+  name!: string
 
   @ApiProperty({ example: 'juan@email.com', description: 'Correo electrónico' })
   @IsEmail()
-  email: string
+  email!: string
 
   @ApiProperty({
     example: 'password123',
@@ -23,37 +23,32 @@ export class RegisterDto {
   @Transform(({ value }: { value: string }) => value.trim())
   @IsString()
   @MinLength(6)
-  password: string
-
-  @ApiProperty({ example: 'user', description: 'Rol del usuario (user/admin)', required: false })
-  @IsString()
-  @IsOptional()
-  role: string
+  password!: string
 
   @ApiProperty({ example: 'Pérez', description: 'Apellido del usuario', required: false })
   @IsString()
   @IsOptional()
-  lastName: string
+  lastName!: string
 
   @ApiProperty({ example: 123456789, description: 'Número de teléfono', required: false })
   @IsNumber()
   @IsOptional()
-  phone: number
+  phone!: number
 
   @ApiProperty({ example: 'Santiago', description: 'Ciudad', required: false })
   @IsString()
   @IsOptional()
-  city: string
+  city!: string
 
   @ApiProperty({ example: 'Chile', description: 'País', required: false })
   @IsString()
   @IsOptional()
-  country: string
+  country!: string
 
   @ApiProperty({ example: 'Av. Principal 123', description: 'Dirección', required: false })
   @IsString()
   @IsOptional()
-  address: string
+  address!: string
 
   @ApiProperty({
     example: 'https://example.com/image.jpg',
@@ -62,14 +57,9 @@ export class RegisterDto {
   })
   @IsString()
   @IsOptional()
-  image_url: string
+  image_url!: string
 
   @ApiProperty({ example: '12345678-9', description: 'RUT del usuario' })
   @IsString()
-  rut: string
-
-  @ApiProperty({ example: 'google', description: 'Proveedor de autenticación', required: false })
-  @IsOptional()
-  @IsString()
-  provider: string
+  rut!: string
 }

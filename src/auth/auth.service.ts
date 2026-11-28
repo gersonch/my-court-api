@@ -1,9 +1,11 @@
 import {
   BadRequestException,
+  HttpException,
   Injectable,
-  InternalServerErrorException, //comentario para que se vea uno abajo del otro
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config' // ← #5/#6: inyectar ConfigService
 import { UsersService } from 'src/users/users.service'
 import { RegisterDto } from './dto/register.dto'
 import { LoginDto } from './dto/login.dto'
@@ -11,12 +13,14 @@ import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { IAuthUser } from './interfaces/auth-user.interface'
 import { validateRut } from '@fdograph/rut-utilities'
+import { Role } from 'src/common/guards/enums/rol.enum'
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService, // ← #5/#6: inyectar ConfigService en constructor
   ) {}
 
   async validateUser(email: string, password: string): Promise<IAuthUser> {
@@ -33,6 +37,7 @@ export class AuthService {
   }
 
   async refresh(refreshToken: string) {
+    const refreshSecret = this.getRefreshSecret() // ← #5: lee via ConfigService (no process.env)
     try {
       const payload = this.jwtService.verify<{
         sub: string
@@ -40,7 +45,7 @@ export class AuthService {
         role: string
         id: string
       }>(refreshToken, {
-        secret: process.env.JWT_REFRESH_SECRET,
+        secret: refreshSecret, // ← #5: era process.env.JWT_REFRESH_SECRET
       })
       const user = await this.usersService.findById(payload.sub)
       if (!user || !user.refreshToken) {
@@ -79,7 +84,7 @@ export class AuthService {
         throw new BadRequestException('Invalid RUT format')
       }
 
-      const data = { ...registerDto, provider: 'local' }
+      const data = { ...registerDto, provider: 'local', role: 'user' }
 
       await this.usersService.create(data)
       return { name: registerDto.name, email: registerDto.email }
@@ -89,11 +94,15 @@ export class AuthService {
     }
   }
 
-  private async login({ email, password }: LoginDto) {
+  private async login({ email, password }: LoginDto, requiredRole: Role) {
+    const refreshSecret = this.getRefreshSecret() // ← #5: lee via ConfigService (no process.env)
     try {
       const user = await this.usersService.findOne(email)
 
-      if (user && user.provider && user.provider !== 'local') {
+      if (!user || user.role !== requiredRole) {
+        throw new UnauthorizedException('Invalid credentials')
+      }
+      if (user.provider !== 'local') {
         throw new BadRequestException(
           `Este usuario ya existe con el proveedor ${user.provider}. Inicia sesión con ${user.provider}.`,
         )
@@ -105,10 +114,10 @@ export class AuthService {
         role: validatedUser.role,
         sub: validatedUser.id,
       }
-      const token = this.jwtService.sign(payload, { expiresIn: '15m' })
+      const token = this.jwtService.sign(payload, { expiresIn: 60 * 15 })
       const refreshToken = this.jwtService.sign(payload, {
-        expiresIn: '7d',
-        secret: process.env.JWT_REFRESH_SECRET,
+        expiresIn: 60 * 60 * 24 * 7,
+        secret: refreshSecret, // ← #5: era process.env.JWT_REFRESH_SECRET
       })
 
       const hashedRefreshToken = await bcrypt.hash(refreshToken, 10)
@@ -124,25 +133,18 @@ export class AuthService {
           role: validatedUser.role,
         },
       }
-    } catch {
+    } catch (error) {
+      if (error instanceof HttpException) throw error
       throw new InternalServerErrorException('Error logging in')
     }
   }
 
-  async loginUser({ email, password }: LoginDto) {
-    const result = await this.login({ email, password })
-    if (result.user.role !== 'user') {
-      throw new UnauthorizedException('Only users can log in here')
-    }
-    return result
+  async loginUser(dto: LoginDto) {
+    return this.login(dto, Role.USER)
   }
 
-  async loginOwner({ email, password }: LoginDto) {
-    const result = await this.login({ email, password })
-    if (result.user.role !== 'owner') {
-      throw new UnauthorizedException('Only owners can log in here')
-    }
-    return result
+  async loginOwner(dto: LoginDto) {
+    return this.login(dto, Role.OWNER)
   }
 
   async validateGoogleUser(googleUser: { email: string; firstName: string }) {
@@ -158,5 +160,14 @@ export class AuthService {
     const payload = { email: user.email, role: user.role, sub: user._id }
     const token = this.jwtService.sign(payload, { expiresIn: '15m' })
     return { token, user }
+  }
+
+  // ← #5: helper privado que valida que el secret existe (lanza 500 si no)
+  private getRefreshSecret(): string {
+    const secret = this.configService.get<string>('JWT_REFRESH_SECRET')
+    if (!secret) {
+      throw new InternalServerErrorException('JWT_REFRESH_SECRET not configured')
+    }
+    return secret
   }
 }

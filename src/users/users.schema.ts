@@ -32,6 +32,8 @@ export const UserSchema = new Schema({
     unique: true,
   },
   provider: { type: String, default: 'local', enum: ['local', 'google'], required: true },
+  rankingPoints: { type: Number, default: 0 },
+  rankingUpdatedAt: { type: Date, default: Date.now },
 })
 
 import type { CallbackError } from 'mongoose'

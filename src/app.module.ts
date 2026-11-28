@@ -8,14 +8,26 @@ import { FieldsModule } from './fields/fields.module'
 import { RatingModule } from './rating/rating.module'
 import { TournamentsModule } from './tournaments/tournaments.module'
 import { ReservationsModule } from './reservations/reservations.module'
+import { RankingPointsModule } from './ranking-points/ranking-points.module'
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import { APP_GUARD } from '@nestjs/core'
+import * as Joi from 'joi'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      validationSchema: Joi.object({
+        JWT_SECRET: Joi.string().required(),
+        MONGODB_URI: Joi.string().required(),
+        GOOGLE_CLIENT_ID: Joi.string().required(),
+        GOOGLE_CLIENT_SECRET: Joi.string().required(),
+        PORT: Joi.number().default(3000),
+      }),
+      validationOptions: {
+        abortEarly: true,
+      },
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -41,6 +53,7 @@ import { APP_GUARD } from '@nestjs/core'
     RatingModule,
     TournamentsModule,
     ReservationsModule,
+    RankingPointsModule,
   ],
   providers: [
     {
